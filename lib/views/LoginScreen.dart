@@ -1,0 +1,242 @@
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+// import 'package:intl_phone_field/intl_phone_field.dart';
+// import 'package:beh_doctor/modules/auth/controller/LoginController.dart';
+
+// class LoginScreen extends StatelessWidget {
+//   final LoginController controller = Get.put(LoginController());
+
+//   LoginScreen({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.white,
+//       body: SafeArea(
+//         child: SingleChildScrollView(
+//           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.center,
+//             children: [
+//               const SizedBox(height: 60),
+//               Text(
+//                 "Welcome",
+//                 style: TextStyle(
+//                   color: Colors.green.shade700,
+//                   fontSize: 32,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//               const SizedBox(height: 40),
+
+//               // Phone input with country code
+//               IntlPhoneField(
+//                 decoration: InputDecoration(
+//                   labelText: 'Enter Phone Number',
+//                   labelStyle: TextStyle(color: Colors.grey.shade600),
+//                   border: OutlineInputBorder(
+//                     borderRadius: BorderRadius.circular(12),
+//                     borderSide: BorderSide(color: Colors.green),
+//                   ),
+//                   focusedBorder: OutlineInputBorder(
+//                     borderRadius: BorderRadius.circular(12),
+//                     borderSide:
+//                         BorderSide(color: Colors.green.shade700, width: 2),
+//                   ),
+//                 ),
+//               initialCountryCode: 'BD',
+//   showDropdownIcon: false,
+//   onChanged: (phone) {
+//     controller.phone.value = phone.number;
+//     controller.dialCode.value = phone.countryCode;
+//                 },
+//                 cursorColor: Colors.green,
+//               ),
+
+//               const SizedBox(height: 50),
+
+//               // Continue Button
+//               Obx(() => SizedBox(
+//                     width: double.infinity,
+//                     height: 55,
+//                     child: ElevatedButton(
+//                       style: ElevatedButton.styleFrom(
+//                         backgroundColor: Colors.green.shade700,
+//                         shape: RoundedRectangleBorder(
+//                           borderRadius: BorderRadius.circular(12),
+//                         ),
+//                       ),
+//                       onPressed: controller.isLoading.value
+//                           ? null
+//                           : () => controller.sendOtp(),
+//                       child: controller.isLoading.value
+//                           ? const CircularProgressIndicator(
+//                               color: Colors.white,
+//                             )
+//                           : const Text(
+//                               "Continue",
+//                               style: TextStyle(
+//                                 fontSize: 18,
+//                                 color: Colors.white,
+//                                 fontWeight: FontWeight.bold,
+//                               ),
+//                             ),
+//                     ),
+//                   )),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:beh_doctor/modules/auth/controller/LoginController.dart';
+import 'package:beh_doctor/views/LanguageChipgetx.dart' as shared_chip;
+
+// ---------------- LOGIN SCREEN ----------------
+class LoginScreen extends StatelessWidget {
+  final LoginController controller = Get.put(LoginController());
+
+  LoginScreen({super.key});
+
+  static const Color appGreen = Color(0xFF008541);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      // ----------- APPBAR WITH LANGUAGE TOGGLE -----------
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+        title: const Text("", style: TextStyle(color: Colors.black)),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: shared_chip.LanguageChipGetX(),
+          ),
+        ],
+      ),
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+
+              // --------- TITLE ---------
+              Text(
+                "welcome".tr,
+                style: TextStyle(
+                  color: appGreen,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // -------- PHONE FIELD ----------
+              IntlPhoneField(
+                decoration: InputDecoration(
+                  labelText: 'enter_phone_number'.tr,
+                  labelStyle: TextStyle(color: Colors.grey.shade600),
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: appGreen),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: appGreen, width: 2),
+                  ),
+                ),
+                initialCountryCode: 'BD',
+                showDropdownIcon: false,
+                cursorColor: appGreen,
+                onChanged: (phone) {
+                  controller.phone.value = phone.number;
+                  controller.dialCode.value = phone.countryCode;
+                },
+              ),
+
+              const SizedBox(height: 50),
+
+              // -------- CONTINUE BUTTON --------
+              Obx(
+                () => SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appGreen,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () => controller.sendOtp(),
+                    child: controller.isLoading.value
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            "continue".tr,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              // -------- TERMS & CONDITIONS --------
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "by_continuing".tr,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                  Text(
+                    "terms_conditions".tr,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: appGreen,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 5),
+
+              Text(
+                "privacy_policy_applies".tr,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: appGreen,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
