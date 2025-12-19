@@ -172,6 +172,7 @@
 
 import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 class AppColors {
@@ -223,9 +224,11 @@ class MyStatusWidget extends StatelessWidget {
 
                   _CustomToggle(
                     value: isOnline,
-                    onChanged: (v) {
+                    onChanged: (v) async {
+                      EasyLoading.show(status: "Please wait..");
                       String newStatus = v ? "online" : "offline";
-                      controller.updateAvailabilityStatus(newStatus);
+                      await controller.updateAvailabilityStatus(newStatus);
+                      EasyLoading.dismiss();
                     },
                   ),
 

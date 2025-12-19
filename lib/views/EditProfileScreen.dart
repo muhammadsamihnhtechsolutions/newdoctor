@@ -114,13 +114,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 25),
 
               /// Full name
-              fieldLabel("full_name".tr),
+              Align(
+                alignment: AlignmentGeometry.topLeft,
+                child: fieldLabel("full_name".tr),
+              ),
               inputField(nameCtrl),
 
               const SizedBox(height: 15),
 
               /// About
-              fieldLabel("about".tr),
+              Align(
+                alignment: AlignmentGeometry.topLeft,
+                child: fieldLabel("about".tr),
+              ),
               inputField(aboutCtrl, maxLines: 3),
 
               const SizedBox(height: 15),
@@ -153,7 +159,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 15),
 
               /// Gender
-              fieldLabel("gender".tr),
+              Align(
+                alignment: AlignmentGeometry.topLeft,
+                child: fieldLabel("gender".tr),
+              ),
               DropdownButtonFormField<String>(
                 value: selectedGender,
                 decoration: dropDecoration(),

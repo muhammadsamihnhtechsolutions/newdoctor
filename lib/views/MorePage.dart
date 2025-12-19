@@ -130,88 +130,97 @@ class MorePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
+      body: SafeArea(
+        top: true,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
 
-            // Header
-            DoctorHeaderWidget(),
-            const SizedBox(height: 20),
+              // Header
+              DoctorHeaderWidget(),
+              const SizedBox(height: 20),
 
-            // ---------------- PAYMENT ----------------
-            sectionTitle("payment".tr),
-            menuTile(
-              "payout_accounts".tr,
-              Icons.account_balance_wallet,
-              onTap: () {
-                Get.to(() => WithdrawScreen());
-              },
-            ),
-            menuTile(
-              "earning_history".tr,
-              Icons.history,
-              onTap: () {
-                Get.to(() => EarningHistoryScreen());
-              },
-            ),
+              // ---------------- PAYMENT ----------------
+              sectionTitle("payment".tr),
+              menuTile(
+                "payout_accounts".tr,
+                Icons.account_balance_wallet,
+                onTap: () {
+                  Get.to(() => WithdrawScreen());
+                },
+              ),
+              menuTile(
+                "earning_history".tr,
+                Icons.history,
+                onTap: () {
+                  Get.to(() => EarningHistoryScreen());
+                },
+              ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // ---------------- SETTINGS ----------------
-            sectionTitle("settings".tr),
-            menuTile("change_mobile_number".tr, Icons.phone_android),
-            menuTile("language".tr, Icons.language),
-            menuTile(
-              "profile".tr,
-              Icons.person,
-              onTap: () {
-                Get.to(() => DoctorProfileScreen());
-              },
-            ),
+              // ---------------- SETTINGS ----------------
+              sectionTitle("settings".tr),
+              menuTile("change_mobile_number".tr, Icons.phone_android),
+              menuTile("language".tr, Icons.language),
+              menuTile(
+                "profile".tr,
+                Icons.person,
+                onTap: () {
+                  Get.to(() => DoctorProfileScreen());
+                },
+              ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // ---------------- LEGAL ----------------
-            sectionTitle("legal".tr),
-            menuTile(
-              "terms_and_conditions".tr,
-              Icons.description,
-              onTap: () {
-                Get.toNamed('/TermsAndConditionsPage');
-              },
-            ),
-            menuTile(
-              "privacy_policy".tr,
-              Icons.privacy_tip,
-              onTap: () {
-                Get.toNamed('/PrivacyPolicyPage');
-              },
-            ),
+              // ---------------- LEGAL ----------------
+              sectionTitle("legal".tr),
+              menuTile(
+                "terms_and_conditions".tr,
+                Icons.description,
+                onTap: () {
+                  Get.toNamed('/TermsAndConditionsPage');
+                },
+              ),
+              menuTile(
+                "privacy_policy".tr,
+                Icons.privacy_tip,
+                onTap: () {
+                  Get.toNamed('/PrivacyPolicyPage');
+                },
+              ),
 
-            menuTile(
-              "payment_terms".tr,
-              Icons.receipt_long,
-              onTap: () {
-                Get.toNamed('/paymentterms');
-              },
-            ),
+              menuTile(
+                "payment_terms".tr,
+                Icons.receipt_long,
+                onTap: () {
+                  Get.toNamed('/paymentterms');
+                },
+              ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // ---------------- HELP ----------------
-            sectionTitle("help".tr),
-            menuTile("emergency_call".tr, Icons.call),
+              // ---------------- HELP ----------------
+              sectionTitle("help".tr),
+              menuTile("emergency_call".tr, Icons.call),
 
-            const SizedBox(height: 50),
-            ElevatedButton(
-              onPressed: () {
-                Get.put(LogoutController()).logout();
-              },
-              child: Text("logout".tr),
-            ),
-          ],
+              const SizedBox(height: 50),
+              Center(
+                child: SizedBox(
+                  width: Get.width / 2,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Get.put(LogoutController()).logout();
+                    },
+                    child: Text("logout".tr),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 50),
+            ],
+          ),
         ),
       ),
     );

@@ -255,6 +255,8 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:beh_doctor/modules/auth/controller/AgoraCallController.dart';
 
+import 'CallsOptionBottomSheet.dart';
+
 class AgoraDoctorCallScreen extends StatefulWidget {
   final String channelId;
   final String token;
@@ -476,6 +478,20 @@ class _AgoraDoctorCallScreenState extends State<AgoraDoctorCallScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    AgoraCallButton(
+                      buttonColor: const Color(0xFFCCE7D9),
+                      icon: Icons.list,
+                      iconColor: const Color(0xFF008541),
+                      callBackFunction: () async {
+                        // await controller.endCall(goToPrescription: true);
+                        Get.bottomSheet(
+                          CallOptionsBottomSheet(),
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 16),
                     AgoraCallButton(
                       buttonColor: const Color(0xFFCCE7D9),
                       icon: controller.isSpeakerOn.value

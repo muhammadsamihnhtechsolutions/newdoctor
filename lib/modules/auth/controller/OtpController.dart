@@ -1,4 +1,5 @@
 import 'package:beh_doctor/repo/AuthRepo.dart';
+import 'package:beh_doctor/views/BottomNavScreen.dart';
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +41,8 @@ class OtpController extends GetxController {
         deviceToken: deviceToken,
       );
 
+      print("OTP RESULT=> $result");
+
       if (result.status == 'success' &&
           result.data != null &&
           result.data!.token != null) {
@@ -48,7 +51,7 @@ class OtpController extends GetxController {
         await prefs.setString('authToken', result.data!.token!);
 
         Get.snackbar('success'.tr, 'otp_verified_token_saved'.tr);
-        Get.offAllNamed(bottomNavRoute); // Navigate to main screen
+        Get.offAll(() => BottomNavScreen());
       } else {
         Get.snackbar(
           'error'.tr,

@@ -8,10 +8,8 @@
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 
-
 // class BottomNavScreen extends GetView<BottomNavController> {
 //   const BottomNavScreen({super.key});
-  
 
 //   @override
 //   Widget build(BuildContext context) {
@@ -19,11 +17,10 @@
 //       HomePage(),
 //       TransactionScreen(),
 //       // PrescriptionScreen(),
-  
+
 //       AppointmentTabScreen(),
 //     //  WithdrawScreen(),
-   
-      
+
 //       const MorePage(),
 //     ];
 
@@ -39,7 +36,6 @@
 //   }
 // }
 
-
 import 'package:beh_doctor/controller/BottomNavController.dart';
 import 'package:beh_doctor/views/AppointmentScreen.dart';
 import 'package:beh_doctor/views/HomePage.dart';
@@ -49,15 +45,19 @@ import 'package:beh_doctor/widgets/CustomeBottomNav.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class BottomNavScreen extends StatelessWidget {
+class BottomNavScreen extends StatefulWidget {
   BottomNavScreen({super.key});
 
-  // ✅ SAFE controller access
-  final BottomNavController controller =
-      Get.isRegistered<BottomNavController>()
-          ? Get.find<BottomNavController>()
-          : Get.put(BottomNavController(), permanent: true);
+  @override
+  State<BottomNavScreen> createState() => _BottomNavScreenState();
+}
 
+class _BottomNavScreenState extends State<BottomNavScreen> {
+  // ✅ SAFE controller access
+
+  final BottomNavController _bottomNavController = Get.put(
+    BottomNavController(),
+  );
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -69,11 +69,11 @@ class BottomNavScreen extends StatelessWidget {
 
     return Scaffold(
       body: PageView(
-        controller: controller.pageController,
+        controller: _bottomNavController.pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: pages,
       ),
-      bottomNavigationBar:  CustomBottomNav(),
+      bottomNavigationBar: CustomBottomNav(),
     );
   }
 }

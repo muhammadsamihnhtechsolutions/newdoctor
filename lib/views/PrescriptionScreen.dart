@@ -63,16 +63,15 @@ class PrescriptionListScreen extends StatefulWidget {
 
 class _PrescriptionListScreenState extends State<PrescriptionListScreen> {
   // final PrescriptionController _controller = Get.put(PrescriptionController());
-  final PrescriptionController _controller = Get.put(
-    PrescriptionController(),
-    permanent: false,
-  );
+  final PrescriptionController _controller = Get.put(PrescriptionController());
 
   @override
   void initState() {
     super.initState();
-    // Fetch only ONCE when screen opens
-    _controller.fetchPrescriptions(widget.patientId);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.fetchPrescriptions(widget.patientId);
+    });
   }
 
   @override

@@ -1,32 +1,37 @@
-import 'package:beh_doctor/routes/AppRoutes.dart';
-import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
-import 'package:beh_doctor/shareprefs.dart';
-import 'package:get/get.dart';
+// import 'package:beh_doctor/routes/AppRoutes.dart';
+// import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
+// import 'package:beh_doctor/shareprefs.dart';
+// import 'package:get/get.dart';
 
-class SplashController extends GetxController {
-  @override
-  void onReady() {
-    super.onReady();
-    _bootstrap();
-  }
+// class SplashController extends GetxController {
+//   @override
+//   void onReady() {
+//     super.onReady();
+//     _bootstrap();
+//   }
 
+//   Future<void> _bootstrap() async {
+//     await SharedPrefs.init();
 
-   
+//     final token = SharedPrefs.getToken();
 
-  Future<void> _bootstrap() async {
-    await SharedPrefs.init();
+//     if (token.isEmpty) {
+//       Get.offAllNamed(Routes.LOGIN);
+//       return;
+//     }
 
-    final token = SharedPrefs.getToken();
+//     print("token from splash controllr => $token");
 
-    if (token.isEmpty) {
-      Get.offAllNamed(Routes.LOGIN);
-      return;
-    }
+//     // if (token.isNotEmpty) {
+//     //   Get.offAllNamed(Routes.BOTTOM_NAV);
+//     // } else {
+//     //   Get.offAllNamed(Routes.LOGIN);
+//     // }
 
-    if (!Get.isRegistered<DoctorProfileController>()) {
-      Get.put(DoctorProfileController(), permanent: true);
-    }
+//     // if (!Get.isRegistered<DoctorProfileController>()) {
+//     //   Get.put(DoctorProfileController(), permanent: true);
+//     // }
 
-    Get.offAllNamed(Routes.BOTTOM_NAV);
-  }
-}
+//     // Get.offAllNamed(Routes.BOTTOM_NAV);
+//   }
+// }

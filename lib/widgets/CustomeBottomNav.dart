@@ -71,17 +71,16 @@ class CustomBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BottomNavController controller =
-        Get.find<BottomNavController>(); // ✅ SAFE (build ke andar)
+    final BottomNavController controller = Get.put(
+      BottomNavController(),
+    ); // ✅ SAFE (build ke andar)
 
     return Container(
       height: 65,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: const BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 8),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -108,10 +107,7 @@ class CustomBottomNav extends StatelessWidget {
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: selected ? AppColors.color008541 : Colors.grey,
-            ),
+            Icon(icon, color: selected ? AppColors.color008541 : Colors.grey),
             const SizedBox(height: 2),
             Text(
               title,

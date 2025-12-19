@@ -774,6 +774,8 @@
 //     await engine?.setEnableSpeakerphone(isSpeakerOn.value);
 //   }
 
+// ignore_for_file: unnecessary_type_check, unnecessary_null_comparison
+
 //   void switchCamera() {
 //     engine?.switchCamera();
 //   }
@@ -904,7 +906,14 @@ class AgoraCallController extends GetxController {
   // JOIN AGORA
   // ------------------------------------------------
   Future<void> joinDoctorAgora() async {
-    if (_joining || channelId.isEmpty || doctorToken.isEmpty) return;
+    // if (_joining || channelId.isEmpty || doctorToken.isEmpty) return;
+    if (_joining ||
+        isJoined.value ||
+        engine != null && isJoined.value ||
+        channelId.isEmpty ||
+        doctorToken.isEmpty) {
+      return;
+    }
     _joining = true;
 
     try {

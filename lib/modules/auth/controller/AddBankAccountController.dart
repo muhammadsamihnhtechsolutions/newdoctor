@@ -90,8 +90,6 @@
 
 import 'package:beh_doctor/models/BankListResponse.dart';
 import 'package:beh_doctor/models/DistrictResponseModel.dart';
-import 'package:beh_doctor/models/WithdrawAccountListResponse.dart';
-import 'package:beh_doctor/modules/auth/controller/WithdrawController.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

@@ -100,7 +100,7 @@ import 'package:beh_doctor/views/DoctorProfileScreen.dart';
 class DoctorHeaderWidget extends StatelessWidget {
   DoctorHeaderWidget({super.key});
 
-  final controller = Get.find<DoctorProfileController>();
+  final controller = Get.put(DoctorProfileController());
 
   @override
   Widget build(BuildContext context) {
