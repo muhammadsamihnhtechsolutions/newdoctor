@@ -1,141 +1,376 @@
-// import 'package:beh_doctor/models/AppointmentModel.dart';
+
+
+// import 'package:beh_doctor/modules/auth/controller/PrescriptionFlowController.dart';
+// import 'package:beh_doctor/views/PrescriptionOverviewScreen.dart';
 // import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+// import 'package:intl/intl.dart';
 
 // class PrescriptionFlowScreen extends StatefulWidget {
-//   const PrescriptionFlowScreen({super.key, required Appointment appointment, required int callDuration});
+//   final String appointmentId;
+//   final int callDuration;
+
+//   const PrescriptionFlowScreen({
+//     super.key,
+//     required this.appointmentId,
+//     required this.callDuration,
+//   });
 
 //   @override
 //   State<PrescriptionFlowScreen> createState() => _PrescriptionFlowScreenState();
 // }
 
 // class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
-//   int step = 1;
+//   late final PrescriptionFlowController controller;
+//   final PageController _pageController = PageController();
+
+//   final TextEditingController _chiefComplaints = TextEditingController();
+//   final TextEditingController _diagnosis = TextEditingController();
+//   final TextEditingController _investigations = TextEditingController();
+//   final TextEditingController _surgery = TextEditingController();
+//   final TextEditingController _referredTo = TextEditingController();
+//   final TextEditingController _followUpDate = TextEditingController();
+
+//   final List<TextEditingController> _medicineNameCtrls = [];
+//   final List<TextEditingController> _medicineNoteCtrls = [];
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     controller = Get.put(PrescriptionFlowController(), permanent: true);
+//     _followUpDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+//   }
+
+//   @override
+//   void dispose() {
+//     _pageController.dispose();
+//     _chiefComplaints.dispose();
+//     _diagnosis.dispose();
+//     _investigations.dispose();
+//     _surgery.dispose();
+//     _referredTo.dispose();
+//     _followUpDate.dispose();
+
+//     for (final c in _medicineNameCtrls) {
+//       c.dispose();
+//     }
+//     for (final c in _medicineNoteCtrls) {
+//       c.dispose();
+//     }
+//     super.dispose();
+//   }
+// Future<void> _exitFlow() async {
+//   try {
+//     if (Get.isRegistered<PrescriptionFlowController>()) {
+//       Get.delete<PrescriptionFlowController>(force: true);
+//     }
+//   } catch (e) {
+//     debugPrint("Controller delete error: $e");
+//   }
+
+//   try {
+//     if (mounted) {
+//       Get.offAllNamed('/appointments');
+//     }
+//   } catch (e) {
+//     debugPrint("Navigation error: $e");
+//   }
+// }
+
+
+//   void _syncMedicinesControllers() {
+//     while (_medicineNameCtrls.length < controller.medicines.length) {
+//       final idx = _medicineNameCtrls.length;
+//       _medicineNameCtrls.add(
+//         TextEditingController(text: controller.medicines[idx]['name'] ?? ''),
+//       );
+//       _medicineNoteCtrls.add(
+//         TextEditingController(text: controller.medicines[idx]['note'] ?? ''),
+//       );
+//     }
+
+//     while (_medicineNameCtrls.length > controller.medicines.length) {
+//       _medicineNameCtrls.removeLast().dispose();
+//       _medicineNoteCtrls.removeLast().dispose();
+//     }
+//   }
+
+//   void _next() {
+//     final idx = controller.step.value;
+
+//     if (idx == 1) {
+//       if (_chiefComplaints.text.trim().isEmpty ||
+//           _diagnosis.text.trim().isEmpty ||
+//           _investigations.text.trim().isEmpty ||
+//           _surgery.text.trim().isEmpty) {
+//         Get.snackbar('Error', 'Please fill all fields');
+//         return;
+//       }
+
+//       controller.chiefComplaints
+//         ..clear()
+//         ..add(_chiefComplaints.text.trim());
+//       controller.diagnosisList
+//         ..clear()
+//         ..add(_diagnosis.text.trim());
+//       controller.investigationList
+//         ..clear()
+//         ..add(_investigations.text.trim());
+//       controller.surgeryList
+//         ..clear()
+//         ..add(_surgery.text.trim());
+
+//       controller.step.value = 2;
+//       _pageController.nextPage(
+//         duration: const Duration(milliseconds: 200),
+//         curve: Curves.easeInOut,
+//       );
+//       return;
+//     }
+
+//     if (idx == 2) {
+//       _syncMedicinesControllers();
+
+//       if (controller.medicines.isEmpty) {
+//         Get.snackbar('Error', 'Add at least one medicine');
+//         return;
+//       }
+
+//       for (var i = 0; i < controller.medicines.length; i++) {
+//         final name = _medicineNameCtrls[i].text.trim();
+//         final note = _medicineNoteCtrls[i].text.trim();
+
+//         if (name.isEmpty || note.isEmpty) {
+//           Get.snackbar('Error', 'Medicine fields missing');
+//           return;
+//         }
+
+//         controller.medicines[i] = {'name': name, 'note': note};
+//       }
+
+//       controller.step.value = 3;
+//       _pageController.nextPage(
+//         duration: const Duration(milliseconds: 200),
+//         curve: Curves.easeInOut,
+//       );
+//       return;
+//     }
+
+//     if (idx == 3) {
+//       if (_referredTo.text.trim().isEmpty) {
+//         Get.snackbar('Error', 'Referred to required');
+//         return;
+//       }
+
+//       controller.referredTo.value = _referredTo.text.trim();
+//       controller.followUpDate.value = _followUpDate.text.trim();
+
+//       Get.to(
+//         () => PrescriptionOverviewScreen(
+//           appointmentId: widget.appointmentId,
+//           callDuration: widget.callDuration,
+//           payload: controller.buildPayload(widget.appointmentId),
+//         ),
+//       );
+//     }
+//   }
+
+//   void _back() {
+//     if (controller.step.value <= 1) return;
+//     controller.step.value--;
+//     _pageController.previousPage(
+//       duration: const Duration(milliseconds: 200),
+//       curve: Curves.easeInOut,
+//     );
+//   }
+
+//   Future<void> _pickDate() async {
+//     final picked = await showDatePicker(
+//       context: context,
+//       initialDate: DateTime.now(),
+//       firstDate: DateTime(1900),
+//       lastDate: DateTime(3000),
+//     );
+//     if (picked == null) return;
+//     _followUpDate.text = DateFormat('yyyy-MM-dd').format(picked);
+//   }
 
 //   @override
 //   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Prescription Flow (Test)'),
-//         centerTitle: true,
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             // Step Indicator
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 _stepChip(1, 'Medicine'),
-//                 _stepChip(2, 'Details'),
-//                 _stepChip(3, 'Overview'),
-//               ],
-//             ),
+//     return WillPopScope(
+//       onWillPop: () async {
+//         await _exitFlow();
+//         return false;
+//       },
+//       child: Scaffold(
+//         appBar: AppBar(
+//           title: const Text('Prescription'),
+//           leading: IconButton(
+//             icon: const Icon(Icons.close),
+//             onPressed: _exitFlow,
+//           ),
+//         ),
+//         body: Obx(() {
+//           _syncMedicinesControllers();
 
-//             const SizedBox(height: 24),
-
-//             // Content
-//             Expanded(child: _buildStepContent()),
-
-//             const SizedBox(height: 16),
-
-//             // Actions
-//             Row(
-//               children: [
-//                 if (step > 1)
-//                   Expanded(
-//                     child: OutlinedButton(
-//                       onPressed: () => setState(() => step--),
-//                       child: const Text('Back'),
-//                     ),
-//                   ),
-//                 if (step > 1) const SizedBox(width: 12),
-//                 Expanded(
-//                   child: ElevatedButton(
-//                     onPressed: () {
-//                       if (step < 3) {
-//                         setState(() => step++);
-//                       } else {
-//                         ScaffoldMessenger.of(context).showSnackBar(
-//                           const SnackBar(content: Text('Prescription Submitted (Test)')),
-//                         );
-//                       }
-//                     },
-//                     child: Text(step < 3 ? 'Next' : 'Submit'),
+//           return Column(
+//             children: [
+//               Padding(
+//                 padding: const EdgeInsets.all(12),
+//                 child: Text(
+//                   'Step ${controller.step.value} of 3',
+//                   style: const TextStyle(
+//                     fontSize: 16,
+//                     fontWeight: FontWeight.w600,
 //                   ),
 //                 ),
-//               ],
+//               ),
+//               Expanded(
+//                 child: PageView(
+//                   controller: _pageController,
+//                   physics: const NeverScrollableScrollPhysics(),
+//                   children: [
+//                     _stepOneUI(),
+//                     _stepTwoUI(),
+//                     _stepThreeUI(),
+//                   ],
+//                 ),
+//               ),
+//               Padding(
+//                 padding: const EdgeInsets.all(12),
+//                 child: Row(
+//                   children: [
+//                     if (controller.step.value > 1)
+//                       Expanded(
+//                         child: OutlinedButton(
+//                           onPressed: _back,
+//                           child: const Text('Back'),
+//                         ),
+//                       ),
+//                     if (controller.step.value > 1)
+//                       const SizedBox(width: 12),
+//                     Expanded(
+//                       child: ElevatedButton(
+//                         onPressed: _next,
+//                         child: Text(
+//                           controller.step.value == 3 ? 'Review' : 'Next',
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           );
+//         }),
+//       ),
+//     );
+//   }
+
+//   // ---------------- UI HELPERS ----------------
+
+//   Widget _stepOneUI() {
+//     return SingleChildScrollView(
+//       padding: const EdgeInsets.all(16),
+//       child: Column(
+//         children: [
+//           _field('Chief Complaints', _chiefComplaints),
+//           _field('Diagnosis', _diagnosis),
+//           _field('Investigations', _investigations),
+//           _field('Surgery', _surgery),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _stepTwoUI() {
+//     return SingleChildScrollView(
+//       padding: const EdgeInsets.all(16),
+//       child: Column(
+//         children: [
+//           ListView.builder(
+//             shrinkWrap: true,
+//             physics: const NeverScrollableScrollPhysics(),
+//             itemCount: controller.medicines.length,
+//             itemBuilder: (_, i) {
+//               return Card(
+//                 margin: const EdgeInsets.only(bottom: 12),
+//                 child: Padding(
+//                   padding: const EdgeInsets.all(12),
+//                   child: Column(
+//                     children: [
+//                       TextField(
+//                         controller: _medicineNameCtrls[i],
+//                         decoration: const InputDecoration(
+//                           labelText: 'Medicine Name',
+//                         ),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       TextField(
+//                         controller: _medicineNoteCtrls[i],
+//                         decoration: const InputDecoration(
+//                           labelText: 'Instruction',
+//                         ),
+//                       ),
+//                       Align(
+//                         alignment: Alignment.centerRight,
+//                         child: IconButton(
+//                           icon: const Icon(Icons.delete),
+//                           onPressed: () {
+//                             controller.removeMedicine(i);
+//                           },
+//                         ),
+//                       )
+//                     ],
+//                   ),
+//                 ),
+//               );
+//             },
+//           ),
+//           OutlinedButton.icon(
+//             onPressed: controller.addEmptyMedicine,
+//             icon: const Icon(Icons.add),
+//             label: const Text('Add Medicine'),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _stepThreeUI() {
+//     return SingleChildScrollView(
+//       padding: const EdgeInsets.all(16),
+//       child: Column(
+//         children: [
+//           _field('Referred To', _referredTo),
+//           const SizedBox(height: 12),
+//           TextField(
+//             controller: _followUpDate,
+//             readOnly: true,
+//             onTap: _pickDate,
+//             decoration: const InputDecoration(
+//               labelText: 'Follow-up Date',
+//               suffixIcon: Icon(Icons.calendar_today),
 //             ),
-//           ],
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _field(String label, TextEditingController c) {
+//     return Padding(
+//       padding: const EdgeInsets.only(bottom: 12),
+//       child: TextField(
+//         controller: c,
+//         decoration: InputDecoration(
+//           labelText: label,
+//           border: const OutlineInputBorder(),
 //         ),
 //       ),
 //     );
 //   }
-
-//   Widget _buildStepContent() {
-//     switch (step) {
-//       case 1:
-//         return _card(
-//           title: 'Add Medicine',
-//           child: Column(
-//             children: const [
-//               TextField(decoration: InputDecoration(labelText: 'Medicine Name')),
-//               SizedBox(height: 12),
-//               TextField(decoration: InputDecoration(labelText: 'Dosage')),
-//             ],
-//           ),
-//         );
-//       case 2:
-//         return _card(
-//           title: 'Prescription Details',
-//           child: Column(
-//             children: const [
-//               TextField(decoration: InputDecoration(labelText: 'Days')),
-//               SizedBox(height: 12),
-//               TextField(decoration: InputDecoration(labelText: 'Instructions')),
-//             ],
-//           ),
-//         );
-//       default:
-//         return _card(
-//           title: 'Overview',
-//           child: const Text(
-//             'Medicine: Paracetamol\nDosage: 2x a day\nDays: 5\n\nDoctor can edit before submit.',
-//           ),
-//         );
-//     }
-//   }
-
-//   Widget _stepChip(int s, String label) {
-//     final isActive = step == s;
-//     return Chip(
-//       label: Text(label),
-//       backgroundColor: isActive ? Colors.green : Colors.grey.shade300,
-//       labelStyle: TextStyle(color: isActive ? Colors.white : Colors.black),
-//     );
-//   }
-
-//   Widget _card({required String title, required Widget child}) {
-//     return Container(
-//       width: double.infinity,
-//       padding: const EdgeInsets.all(16),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(12),
-//         boxShadow: [
-//           BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8),
-//         ],
-//       ),
-//       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-//         Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-//         const SizedBox(height: 12),
-//         child,
-//       ]),
-//     );
-//   }
 // }
-
 import 'package:beh_doctor/modules/auth/controller/PrescriptionFlowController.dart';
 import 'package:beh_doctor/views/PrescriptionOverviewScreen.dart';
 import 'package:flutter/material.dart';
@@ -167,10 +402,10 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
   final TextEditingController _referredTo = TextEditingController();
   final TextEditingController _followUpDate = TextEditingController();
 
-  final TextEditingController _newMedicineName = TextEditingController();
-
   final List<TextEditingController> _medicineNameCtrls = [];
   final List<TextEditingController> _medicineNoteCtrls = [];
+
+  final Color _green = const Color(0xFF2E7D32);
 
   @override
   void initState() {
@@ -188,7 +423,7 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
     _surgery.dispose();
     _referredTo.dispose();
     _followUpDate.dispose();
-    _newMedicineName.dispose();
+
     for (final c in _medicineNameCtrls) {
       c.dispose();
     }
@@ -199,8 +434,15 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
   }
 
   Future<void> _exitFlow() async {
-    Get.delete<PrescriptionFlowController>(force: true);
-    Get.offAllNamed('/appointments');
+    try {
+      if (Get.isRegistered<PrescriptionFlowController>()) {
+        Get.delete<PrescriptionFlowController>(force: true);
+      }
+    } catch (_) {}
+
+    if (mounted) {
+      Get.offAllNamed('/appointments');
+    }
   }
 
   void _syncMedicinesControllers() {
@@ -222,23 +464,13 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
 
   void _next() {
     final idx = controller.step.value;
-    if (idx == 0) return;
 
     if (idx == 1) {
-      if (_chiefComplaints.text.trim().isEmpty) {
-        Get.snackbar('error'.tr, 'please_enter_chief_complaints'.tr);
-        return;
-      }
-      if (_diagnosis.text.trim().isEmpty) {
-        Get.snackbar('error'.tr, 'please_enter_diagnosis'.tr);
-        return;
-      }
-      if (_investigations.text.trim().isEmpty) {
-        Get.snackbar('error'.tr, 'please_enter_investigations'.tr);
-        return;
-      }
-      if (_surgery.text.trim().isEmpty) {
-        Get.snackbar('error'.tr, 'please_enter_surgery_details'.tr);
+      if (_chiefComplaints.text.trim().isEmpty ||
+          _diagnosis.text.trim().isEmpty ||
+          _investigations.text.trim().isEmpty ||
+          _surgery.text.trim().isEmpty) {
+        Get.snackbar('Error', 'Please fill all fields');
         return;
       }
 
@@ -267,27 +499,19 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
       _syncMedicinesControllers();
 
       if (controller.medicines.isEmpty) {
-        Get.snackbar('medicine_required'.tr, 'please_add_one_medicine'.tr);
+        Get.snackbar('Error', 'Add at least one medicine');
         return;
       }
 
       for (var i = 0; i < controller.medicines.length; i++) {
         final name = _medicineNameCtrls[i].text.trim();
         final note = _medicineNoteCtrls[i].text.trim();
-        if (name.isEmpty) {
-          Get.snackbar(
-            'error'.tr,
-            '${"please_enter_medicine_name".tr} ${i + 1}',
-          );
+
+        if (name.isEmpty || note.isEmpty) {
+          Get.snackbar('Error', 'Medicine fields missing');
           return;
         }
-        if (note.isEmpty) {
-          Get.snackbar(
-            'error'.tr,
-            '${"please_enter_medicine_notes".tr} ${i + 1}',
-          );
-          return;
-        }
+
         controller.medicines[i] = {'name': name, 'note': note};
       }
 
@@ -301,7 +525,7 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
 
     if (idx == 3) {
       if (_referredTo.text.trim().isEmpty) {
-        Get.snackbar('error'.tr, 'please_enter_referred_to'.tr);
+        Get.snackbar('Error', 'Referred to required');
         return;
       }
 
@@ -310,8 +534,9 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
 
       Get.to(
         () => PrescriptionOverviewScreen(
-          payload: controller.buildPayload(widget.appointmentId),
+          appointmentId: widget.appointmentId,
           callDuration: widget.callDuration,
+          payload: controller.buildPayload(widget.appointmentId),
         ),
       );
     }
@@ -319,7 +544,7 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
 
   void _back() {
     if (controller.step.value <= 1) return;
-    controller.step.value = controller.step.value - 1;
+    controller.step.value--;
     _pageController.previousPage(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
@@ -337,132 +562,6 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
     _followUpDate.text = DateFormat('yyyy-MM-dd').format(picked);
   }
 
-  Widget _stepDot({required bool done}) {
-    return Container(
-      height: 20,
-      width: 20,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(width: 1, color: const Color(0xFF008541)),
-        color: done ? const Color(0xFF008541) : Colors.transparent,
-      ),
-      child: done
-          ? const Icon(Icons.check, size: 12, color: Colors.white)
-          : const SizedBox(),
-    );
-  }
-
-  Widget _arrowButton({
-    required int quarterTurns,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 60,
-        width: 60,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(60),
-          color: const Color(0xFF008541),
-        ),
-        child: RotatedBox(
-          quarterTurns: quarterTurns,
-          child: const Icon(Icons.arrow_back, color: Colors.white),
-        ),
-      ),
-    );
-  }
-
-  Widget _label(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-    );
-  }
-
-  static const Color _primaryColor = Color(0xFF008541);
-  static const Color _appBackground = Color(0xFFF4F4F4);
-  static const Color _borderColor = Color(0xFFBBBBBB);
-
-  Widget _multilineField(TextEditingController ctrl) {
-    return TextField(
-      controller: ctrl,
-      maxLines: 6,
-      style: const TextStyle(
-        fontFamily: 'Inter',
-        color: Colors.black,
-        fontWeight: FontWeight.w500,
-        fontSize: 14,
-      ),
-      decoration: InputDecoration(
-        isDense: true,
-        filled: true,
-        fillColor: _appBackground,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 12,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: _borderColor, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: _primaryColor, width: 2),
-        ),
-      ),
-    );
-  }
-
-  Widget _textField(
-    TextEditingController ctrl, {
-    int maxLines = 1,
-    bool enabled = true,
-    Widget? suffixIcon,
-    String? hint,
-  }) {
-    return TextField(
-      controller: ctrl,
-      maxLines: maxLines,
-      enabled: enabled,
-      style: const TextStyle(
-        fontFamily: 'Inter',
-        color: Colors.black,
-        fontWeight: FontWeight.w500,
-        fontSize: 14,
-      ),
-      decoration: InputDecoration(
-        isDense: true,
-        filled: true,
-        fillColor: _appBackground,
-        suffixIcon: suffixIcon,
-        hintText: hint ?? '',
-        hintStyle: const TextStyle(
-          fontFamily: 'Inter',
-          color: Color(0xFF888E9D),
-          fontWeight: FontWeight.w500,
-          fontSize: 11,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 12,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: _borderColor, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: _primaryColor, width: 2),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: _borderColor, width: 1),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -471,13 +570,10 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          title: Text('prescription'.tr),
-          centerTitle: false,
-          elevation: 0,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          surfaceTintColor: Colors.white,
+          backgroundColor: _green,
+          title: const Text('Prescription'),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: _exitFlow,
@@ -488,173 +584,188 @@ class _PrescriptionFlowScreenState extends State<PrescriptionFlowScreen> {
 
           return Column(
             children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 12),
-                            _label('chief_complaints'.tr),
-                            _multilineField(_chiefComplaints),
-                            const SizedBox(height: 16),
-                            _label('diagnosis'.tr),
-                            _multilineField(_diagnosis),
-                            const SizedBox(height: 16),
-                            _label('investigations'.tr),
-                            _multilineField(_investigations),
-                            const SizedBox(height: 16),
-                            _label('surgery'.tr),
-                            _multilineField(_surgery),
-                            const SizedBox(height: kToolbarHeight * 2),
-                          ],
-                        ),
-                      ),
-                      SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const SizedBox(height: 12),
-                            ListView.builder(
-                              itemCount: controller.medicines.length,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Container(
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: Border.all(
-                                        color: const Color(0xFFEFEFEF),
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 12,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Medicine ${index + 1}',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'medicine_name'.tr,
-                                          style: const TextStyle(fontSize: 14),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        _textField(_medicineNameCtrls[index]),
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          'notes'.tr,
-                                          style: const TextStyle(fontSize: 14),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        _textField(
-                                          _medicineNoteCtrls[index],
-                                          maxLines: 4,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                controller.addEmptyMedicine();
-                              },
-                              child: Text(
-                                'add_more'.tr,
-                                style: const TextStyle(
-                                  color: Color(0xFF008541),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 12),
-                            _label('referred_to'.tr),
-                            _textField(_referredTo),
-                            const SizedBox(height: 12),
-                            _label('follow_up_date'.tr),
-                            GestureDetector(
-                              onTap: _pickDate,
-                              child: AbsorbPointer(
-                                child: _textField(
-                                  _followUpDate,
-                                  enabled: false,
-                                  suffixIcon: const Icon(
-                                    Icons.calendar_month,
-                                    size: 18,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Text(
+                  'Step ${controller.step.value} of 3',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: _green,
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                height: kToolbarHeight * 2,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    controller.step.value == 1
-                        ? const SizedBox(width: 60)
-                        : _arrowButton(quarterTurns: 0, onTap: _back),
-                    Row(
-                      children: [
-                        _stepDot(done: controller.step.value > 1),
-                        Container(
-                          height: 1,
-                          width: 8,
-                          color: const Color(0xFF008541),
+                    _stepOneUI(),
+                    _stepTwoUI(),
+                    _stepThreeUI(),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    if (controller.step.value > 1)
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: _green),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          onPressed: _back,
+                          child: Text(
+                            'Back',
+                            style: TextStyle(color: _green),
+                          ),
                         ),
-                        _stepDot(done: controller.step.value > 2),
-                        Container(
-                          height: 1,
-                          width: 8,
-                          color: const Color(0xFF008541),
+                      ),
+                    if (controller.step.value > 1)
+                      const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _green,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        _stepDot(done: controller.step.value > 3),
-                      ],
+                        onPressed: _next,
+                        child: Text(
+                          controller.step.value == 3 ? 'Review' : 'Next',
+                        ),
+                      ),
                     ),
-                    _arrowButton(quarterTurns: 2, onTap: _next),
                   ],
                 ),
               ),
             ],
           );
         }),
+      ),
+    );
+  }
+
+  // ---------------- UI HELPERS ----------------
+
+  Widget _stepOneUI() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _field('Chief Complaints', _chiefComplaints),
+          _field('Diagnosis', _diagnosis),
+          _field('Investigations', _investigations),
+          _field('Surgery', _surgery),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepTwoUI() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: controller.medicines.length,
+            itemBuilder: (_, i) {
+              return Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: _green.withOpacity(0.3)),
+                ),
+                margin: const EdgeInsets.only(bottom: 14),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    children: [
+                      _field('Medicine Name', _medicineNameCtrls[i]),
+                      _field('Instruction', _medicineNoteCtrls[i]),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red.shade400),
+                          onPressed: () {
+                            controller.removeMedicine(i);
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: _green),
+            ),
+            onPressed: controller.addEmptyMedicine,
+            icon: Icon(Icons.add, color: _green),
+            label: Text(
+              'Add Medicine',
+              style: TextStyle(color: _green),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepThreeUI() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _field('Referred To', _referredTo),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _followUpDate,
+            readOnly: true,
+            onTap: _pickDate,
+            decoration: _inputDecoration('Follow-up Date')
+                .copyWith(suffixIcon: const Icon(Icons.calendar_today)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _field(String label, TextEditingController c) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextField(
+        controller: c,
+        minLines: 1,
+        maxLines: 3,
+        decoration: _inputDecoration(label),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: _green),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: _green, width: 2),
       ),
     );
   }

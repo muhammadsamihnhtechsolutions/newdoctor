@@ -24,7 +24,7 @@ class AppointmentTabScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.white,
         title: Text(
-          "appointments".tr,
+          "Queue".tr,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
       ),
@@ -47,12 +47,12 @@ class AppointmentTabScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     _innerTab(
-                      title: "upcoming".tr,
+                      title: "Upcoming".tr,
                       isSelected: _controller.selectedTab.value == 0,
                       onTap: () => _controller.changeTab(0),
                     ),
                     _innerTab(
-                      title: "past".tr,
+                      title: "Past".tr,
                       isSelected: _controller.selectedTab.value == 1,
                       onTap: () => _controller.changeTab(1),
                     ),

@@ -85,6 +85,7 @@
 // }
 
 import 'package:beh_doctor/apiconstant/apiconstant.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:beh_doctor/models/AppoinmentDetailModel.dart';
 import 'package:get/get.dart';
@@ -383,20 +384,69 @@ class PdfViewerScreen extends StatelessWidget {
   }
 }
 
+
+
+
 class FullscreenImageViewer extends StatelessWidget {
   final String imageUrl;
   const FullscreenImageViewer({required this.imageUrl, super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (imageUrl.trim().isEmpty) {
+      return _errorScaffold("Image not available");
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
-
       appBar: AppBar(
         backgroundColor: Colors.black,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Center(child: InteractiveViewer(child: Image.network(imageUrl))),
+      body: Center(
+        child: InteractiveViewer(
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+
+    
+            placeholder: (_, __) => const CircularProgressIndicator(
+              color: Colors.white,
+            ),
+
+         
+            errorWidget: (_, __, ___) => _errorWidget(),
+
+            fadeInDuration: const Duration(milliseconds: 200),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _errorWidget() {
+    return const Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.broken_image, color: Colors.white, size: 60),
+        SizedBox(height: 10),
+        Text(
+          "Unable to load image",
+          style: TextStyle(color: Colors.white),
+        ),
+      ],
+    );
+  }
+
+  Scaffold _errorScaffold(String msg) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: Text(msg, style: const TextStyle(color: Colors.white)),
+      ),
     );
   }
 }

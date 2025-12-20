@@ -774,12 +774,383 @@
 //     await engine?.setEnableSpeakerphone(isSpeakerOn.value);
 //   }
 
-// ignore_for_file: unnecessary_type_check, unnecessary_null_comparison
+//   void switchCamera() {
+//     engine?.switchCamera();
+//   }
+// }
+// import 'dart:async';
+
+// import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+// import 'package:beh_doctor/Handler/AgoraCallSocketHandler.dart';
+// import 'package:beh_doctor/models/AppointmentModel.dart';
+// import 'package:beh_doctor/repo/AuthRepo.dart';
+// import 'package:beh_doctor/views/PrescriptionFlowScreen.dart';
+// import 'package:dio/dio.dart';
+// import 'package:get/get.dart';
+
+// class AgoraCallController extends GetxController {
+//   final ApiRepo _repo = ApiRepo();
+
+//   RtcEngine? engine;
+
+//   var isJoined = false.obs;
+//   var isRemoteUserJoined = false.obs;
+//   var remoteUid = 0.obs;
+//   RxBool isPrescriptionLoading = false.obs;
+//   RxBool shouldCloseCallScreen = false.obs;
+
+//   RxBool isMuted = false.obs;
+//   RxBool isSpeakerOn = false.obs;
+
+//   String channelId = "";
+//   String doctorToken = "";
+
+//   Appointment? currentAppointment;
+
+//   var callDurationSec = 0.obs;
+//   Timer? _callTimer;
+//   Timer? _patientJoinTimer;
+
+//   bool _joining = false;
+
+//   bool _callEnded = false; // 🔥 FIX: prevent multiple end calls
+
+//   // ------------------------------------------------
+//   // LIFECYCLE
+//   // ------------------------------------------------
+//   @override
+//   void onClose() {
+//     _stopAllTimers();
+//     _cleanupEngine();
+//     try {
+//       AgoraCallSocketHandler.instance.disposeSocket();
+//     } catch (_) {}
+//     super.onClose();
+//   }
+
+//   // ------------------------------------------------
+//   // SET APPOINTMENT
+//   // ------------------------------------------------
+//   void setAppointment(Appointment appt) {
+//     currentAppointment = appt;
+//     channelId = appt.id ?? "";
+//     doctorToken = appt.doctorAgoraToken ?? "";
+//     _callEnded = false; // 🔥 FIX reset for new call
+//     shouldCloseCallScreen.value = false;
+//   }
+
+//   // ------------------------------------------------
+//   // UI JOIN
+//   // ------------------------------------------------
+//   Future<void> joinCall({
+//     required String channelId,
+//     required String token,
+//   }) async {
+//     this.channelId = channelId;
+//     doctorToken = token;
+//     await joinDoctorAgora();
+//   }
+
+//   // ------------------------------------------------
+//   // CALL NOW
+//   // ------------------------------------------------
+//   Future<void> callNow() async {
+//     if (currentAppointment == null) return;
+
+//     try {
+//       final res = await _repo.makeAppointmentCall(
+//         appointmentId: currentAppointment!.id!,
+//       );
+
+//       if (res == null || (res is Map && res["status"] != "success")) {
+//         Get.snackbar("error".tr, "failed_to_notify_patient".tr);
+//         return;
+//       }
+//     } catch (_) {
+//       Get.snackbar("error".tr, "network_error".tr);
+//       return;
+//     }
+
+//     await AgoraCallSocketHandler.instance.initSocket(
+//       appointmentId: channelId,
+//       onJoinedEvent: (_) {
+//         isRemoteUserJoined.value = true;
+//         _patientJoinTimer?.cancel();
+//       },
+//       onRejectedEvent: (_) {
+//         _handleRemoteEnd("patient_rejected_call".tr);
+//       },
+//       onEndedEvent: (_) {
+//         _handleRemoteEnd("patient_ended_call".tr);
+//       },
+//     );
+
+//     await joinDoctorAgora();
+
+//     try {
+//       await isJoined.stream
+//           .firstWhere((v) => v == true)
+//           .timeout(const Duration(seconds: 20));
+
+//       _startCallTimer();
+//       _startPatientJoinTimeout();
+
+//       Get.toNamed("/AgoraDoctorCallScreen");
+//     } catch (_) {
+//       await _cleanupEngine();
+//     }
+//   }
+
+//   // ------------------------------------------------
+//   // JOIN AGORA
+//   // ------------------------------------------------
+//   Future<void> joinDoctorAgora() async {
+//     if (_joining || channelId.isEmpty || doctorToken.isEmpty) return;
+//     _joining = true;
+
+//     try {
+//       engine ??= createAgoraRtcEngine();
+//       await engine!.initialize(
+//         const RtcEngineContext(appId: "0fb1a1ecf5a34db2b51d9896c994652a"),
+//       );
+
+//       engine!.registerEventHandler(
+//         RtcEngineEventHandler(
+//           onJoinChannelSuccess: (_, __) {
+//             isJoined.value = true;
+//           },
+//           onUserJoined: (_, uid, __) {
+//             remoteUid.value = uid;
+//             isRemoteUserJoined.value = true;
+//             _patientJoinTimer?.cancel();
+//           },
+//           onUserOffline: (_, __, ___) {
+//             _handleRemoteEnd("patient_disconnected_call".tr);
+//           },
+//         ),
+//       );
+
+//       await engine!.enableVideo();
+//       await engine!.enableAudio();
+//       await engine!.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+
+//       await engine!.joinChannel(
+//         token: doctorToken,
+//         channelId: channelId,
+//         uid: 0,
+//         options: const ChannelMediaOptions(
+//           publishCameraTrack: true,
+//           publishMicrophoneTrack: true,
+//         ),
+//       );
+//     } finally {
+//       _joining = false;
+//     }
+//   }
+
+//   // ------------------------------------------------
+//   // CALL DROPPED / REJECTED
+//   // ------------------------------------------------
+//   Future<void> _markCallDropped(String message) async {
+//     if (_callEnded) return; // 🔥 FIX
+//     _callEnded = true;
+
+//     try {
+//       await _repo.markAppointmentCallAsDropped(channelId);
+//     } catch (_) {}
+
+//     Get.snackbar("call_ended".tr, message);
+
+//     await _endCallInternal(emitEndCallEvent: false, goToPrescription: false);
+//   }
+
+//   Future<void> _handleRemoteEnd(String message) async {
+//     if (_callEnded) return;
+//     _callEnded = true;
+
+//     Get.snackbar("call_ended".tr, message);
+
+//     await _endCallInternal(emitEndCallEvent: false, goToPrescription: false);
+//   }
+
+//   // ------------------------------------------------
+//   // END CALL
+//   // ------------------------------------------------
+//   Future<void> endCall({required bool goToPrescription}) async {
+//     if (_callEnded) return;
+//     _callEnded = true;
+
+//     await _endCallInternal(
+//       emitEndCallEvent: true,
+//       goToPrescription: goToPrescription,
+//     );
+//   }
+
+//   Future<void> _endCallInternal({
+//     required bool emitEndCallEvent,
+//     required bool goToPrescription,
+//   }) async {
+//     final bool hadPatientJoined = isRemoteUserJoined.value;
+
+//     if (emitEndCallEvent) {
+//       try {
+//         AgoraCallSocketHandler.instance.emitEndCall(appointmentId: channelId);
+//       } catch (_) {}
+//     }
+
+//     try {
+//       AgoraCallSocketHandler.instance.disposeSocket();
+//     } catch (_) {}
+
+//     await _cleanupEngine();
+//     _stopAllTimers();
+
+//     // BLoC behavior: only go to prescription if patient actually joined.
+//     if (goToPrescription && hadPatientJoined && currentAppointment != null) {
+//       Get.off(
+//         () => PrescriptionFlowScreen(
+//           appointmentId: currentAppointment!.id!,
+//           callDuration: callDurationSec.value,
+//         ),
+//       );
+//       return;
+//     }
+
+//     // Signal UI to close call screen (prevents loader loop when engine/isJoined reset)
+//     shouldCloseCallScreen.value = true;
+
+//     // Close call screen (avoid being stuck on loader after cleanup)
+//     try {
+//       final current = Get.currentRoute;
+//       if (current.contains("AgoraDoctorCallScreen")) {
+//         Get.back();
+//         return;
+//       }
+
+//       if (Get.key.currentState?.canPop() ?? false) {
+//         Get.back();
+//       }
+//     } catch (_) {}
+//   }
+
+//   // ------------------------------------------------
+//   // SUBMIT PRESCRIPTION
+//   // ------------------------------------------------
+// Future<void> submitPrescriptionAndCompleteCall({
+//   required Map<String, dynamic> payload,
+// }) async {
+//   if (isPrescriptionLoading.value) return;
+
+//   isPrescriptionLoading.value = true;
+//   print("🟡 submit start");
+
+//   try {
+//     // ---------------- SUBMIT PRESCRIPTION ----------------
+//     final res = await _repo.submitPrescription(payload);
+//     print("✅ submit response: ${res.status}");
+
+//     if (res.status != "success") {
+//       isPrescriptionLoading.value = false;
+//       Get.snackbar("error".tr, res.message ?? "submit_failed".tr);
+//       return;
+//     }
+
+//     // ---------------- MARK CALL COMPLETED ----------------
+//     final callRes = await _repo.markAppointmentCallAsCompleted(
+//       channelId,
+//       callDurationSec.value,
+//     );
+
+//   try {
+//   await _repo.markAppointmentCallAsCompleted(
+//     channelId,
+//     callDurationSec.value,
+//   );
+
+//   print("✅ call marked completed");
+// } catch (e) {
+//   // ❌ PATCH fail but app continues
+//   print("❌ call complete failed");
+// }
+
+//     // ---------------- FINISH FLOW ----------------
+//     isPrescriptionLoading.value = false;
+
+//     if (Get.key.currentState?.canPop() ?? false) Get.back();
+//     if (Get.key.currentState?.canPop() ?? false) Get.back();
+//   } catch (e, s) {
+//     isPrescriptionLoading.value = false;
+//     print("❌ submit error");
+//     print(e);
+//     print(s);
+//     Get.snackbar("error".tr, "something_went_wrong".tr);
+//   }
+// }
+
+  
+//   // ------------------------------------------------
+//   // TIMERS
+//   // ------------------------------------------------
+//   void _startCallTimer() {
+//     callDurationSec.value = 0;
+//     _callTimer?.cancel();
+//     _callTimer = Timer.periodic(
+//       const Duration(seconds: 1),
+//       (_) => callDurationSec.value++,
+//     );
+//   }
+
+//   void _startPatientJoinTimeout() {
+//     _patientJoinTimer?.cancel();
+//     _patientJoinTimer = Timer(const Duration(seconds: 30), () {
+//       if (!isRemoteUserJoined.value) {
+//         _markCallDropped("patient_did_not_pick_up".tr);
+//       }
+//     });
+//   }
+
+//   void _stopAllTimers() {
+//     _callTimer?.cancel();
+//     _patientJoinTimer?.cancel();
+//     _callTimer = null;
+//     _patientJoinTimer = null;
+//   }
+
+//   // ------------------------------------------------
+//   // CLEANUP
+//   // ------------------------------------------------
+//   Future<void> _cleanupEngine() async {
+//     if (engine != null) {
+//       try {
+//         await engine!.leaveChannel();
+//         await engine!.release();
+//       } catch (_) {}
+//       engine = null;
+//     }
+
+//     isJoined.value = false;
+//     isRemoteUserJoined.value = false;
+//     remoteUid.value = 0;
+//   }
+
+//   // ------------------------------------------------
+//   // UI CONTROLS
+//   // ------------------------------------------------
+//   void toggleMute() {
+//     isMuted.value = !isMuted.value;
+//     engine?.muteLocalAudioStream(isMuted.value);
+//   }
+
+//   void toggleSpeaker() async {
+//     isSpeakerOn.value = !isSpeakerOn.value;
+//     await engine?.setEnableSpeakerphone(isSpeakerOn.value);
+//   }
 
 //   void switchCamera() {
 //     engine?.switchCamera();
 //   }
 // }
+
 import 'dart:async';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
@@ -787,6 +1158,8 @@ import 'package:beh_doctor/Handler/AgoraCallSocketHandler.dart';
 import 'package:beh_doctor/models/AppointmentModel.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
 import 'package:beh_doctor/views/PrescriptionFlowScreen.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AgoraCallController extends GetxController {
@@ -813,12 +1186,8 @@ class AgoraCallController extends GetxController {
   Timer? _patientJoinTimer;
 
   bool _joining = false;
+  bool _callEnded = false;
 
-  bool _callEnded = false; // 🔥 FIX: prevent multiple end calls
-
-  // ------------------------------------------------
-  // LIFECYCLE
-  // ------------------------------------------------
   @override
   void onClose() {
     _stopAllTimers();
@@ -829,20 +1198,14 @@ class AgoraCallController extends GetxController {
     super.onClose();
   }
 
-  // ------------------------------------------------
-  // SET APPOINTMENT
-  // ------------------------------------------------
   void setAppointment(Appointment appt) {
     currentAppointment = appt;
     channelId = appt.id ?? "";
     doctorToken = appt.doctorAgoraToken ?? "";
-    _callEnded = false; // 🔥 FIX reset for new call
+    _callEnded = false;
     shouldCloseCallScreen.value = false;
   }
 
-  // ------------------------------------------------
-  // UI JOIN
-  // ------------------------------------------------
   Future<void> joinCall({
     required String channelId,
     required String token,
@@ -852,9 +1215,6 @@ class AgoraCallController extends GetxController {
     await joinDoctorAgora();
   }
 
-  // ------------------------------------------------
-  // CALL NOW
-  // ------------------------------------------------
   Future<void> callNow() async {
     if (currentAppointment == null) return;
 
@@ -902,18 +1262,8 @@ class AgoraCallController extends GetxController {
     }
   }
 
-  // ------------------------------------------------
-  // JOIN AGORA
-  // ------------------------------------------------
   Future<void> joinDoctorAgora() async {
-    // if (_joining || channelId.isEmpty || doctorToken.isEmpty) return;
-    if (_joining ||
-        isJoined.value ||
-        engine != null && isJoined.value ||
-        channelId.isEmpty ||
-        doctorToken.isEmpty) {
-      return;
-    }
+    if (_joining || channelId.isEmpty || doctorToken.isEmpty) return;
     _joining = true;
 
     try {
@@ -940,7 +1290,9 @@ class AgoraCallController extends GetxController {
 
       await engine!.enableVideo();
       await engine!.enableAudio();
-      await engine!.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+      await engine!.setClientRole(
+        role: ClientRoleType.clientRoleBroadcaster,
+      );
 
       await engine!.joinChannel(
         token: doctorToken,
@@ -956,11 +1308,8 @@ class AgoraCallController extends GetxController {
     }
   }
 
-  // ------------------------------------------------
-  // CALL DROPPED / REJECTED
-  // ------------------------------------------------
   Future<void> _markCallDropped(String message) async {
-    if (_callEnded) return; // 🔥 FIX
+    if (_callEnded) return;
     _callEnded = true;
 
     try {
@@ -969,7 +1318,10 @@ class AgoraCallController extends GetxController {
 
     Get.snackbar("call_ended".tr, message);
 
-    await _endCallInternal(emitEndCallEvent: false, goToPrescription: false);
+    await _endCallInternal(
+      emitEndCallEvent: false,
+      goToPrescription: false,
+    );
   }
 
   Future<void> _handleRemoteEnd(String message) async {
@@ -978,12 +1330,12 @@ class AgoraCallController extends GetxController {
 
     Get.snackbar("call_ended".tr, message);
 
-    await _endCallInternal(emitEndCallEvent: false, goToPrescription: false);
+    await _endCallInternal(
+      emitEndCallEvent: false,
+      goToPrescription: false,
+    );
   }
 
-  // ------------------------------------------------
-  // END CALL
-  // ------------------------------------------------
   Future<void> endCall({required bool goToPrescription}) async {
     if (_callEnded) return;
     _callEnded = true;
@@ -994,56 +1346,85 @@ class AgoraCallController extends GetxController {
     );
   }
 
+  // ================= FIXED (TRY CATCH + LOGS ONLY) =================
   Future<void> _endCallInternal({
     required bool emitEndCallEvent,
     required bool goToPrescription,
   }) async {
-    final bool hadPatientJoined = isRemoteUserJoined.value;
+    try {
+      final bool hadPatientJoined = isRemoteUserJoined.value;
 
-    if (emitEndCallEvent) {
+      print("🟡 endCallInternal");
+      print("appointmentId: ${currentAppointment?.id}");
+      print("callDuration: ${callDurationSec.value}");
+      print("goToPrescription: $goToPrescription");
+      print("hadPatientJoined: $hadPatientJoined");
+
+      if (emitEndCallEvent) {
+        try {
+          AgoraCallSocketHandler.instance
+              .emitEndCall(appointmentId: channelId);
+        } catch (e) {
+          print("❌ emitEndCall error: $e");
+        }
+      }
+
       try {
-        AgoraCallSocketHandler.instance.emitEndCall(appointmentId: channelId);
-      } catch (_) {}
-    }
-
-    try {
-      AgoraCallSocketHandler.instance.disposeSocket();
-    } catch (_) {}
-
-    await _cleanupEngine();
-    _stopAllTimers();
-
-    // BLoC behavior: only go to prescription if patient actually joined.
-    if (goToPrescription && hadPatientJoined && currentAppointment != null) {
-      Get.off(
-        () => PrescriptionFlowScreen(
-          appointmentId: currentAppointment!.id!,
-          callDuration: callDurationSec.value,
-        ),
-      );
-      return;
-    }
-
-    // Signal UI to close call screen (prevents loader loop when engine/isJoined reset)
-    shouldCloseCallScreen.value = true;
-
-    // Close call screen (avoid being stuck on loader after cleanup)
-    try {
-      final current = Get.currentRoute;
-      if (current.contains("AgoraDoctorCallScreen")) {
-        Get.back();
-        return;
+        AgoraCallSocketHandler.instance.disposeSocket();
+      } catch (e) {
+        print("❌ disposeSocket error: $e");
       }
 
-      if (Get.key.currentState?.canPop() ?? false) {
-        Get.back();
+      try {
+        await _cleanupEngine();
+      } catch (e) {
+        print("❌ cleanupEngine error: $e");
       }
-    } catch (_) {}
+
+      _stopAllTimers();
+
+      if (goToPrescription &&
+          hadPatientJoined &&
+          currentAppointment != null) {
+        try {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+  Get.off(
+    () => PrescriptionFlowScreen(
+      appointmentId: currentAppointment!.id!,
+      callDuration: callDurationSec.value,
+    ),
+  );
+});
+
+          return;
+        } catch (e) {
+          print("❌ navigation error: $e");
+        }
+      }
+
+      shouldCloseCallScreen.value = true;
+
+      try {
+        final current = Get.currentRoute;
+        if (current.contains("AgoraDoctorCallScreen")) {
+          Get.back();
+          return;
+        }
+
+        if (Get.key.currentState?.canPop() ?? false) {
+          Get.back();
+        }
+      } catch (e) {
+        print("❌ back error: $e");
+      }
+    } catch (e, s) {
+      print("🔥 endCallInternal crash prevented");
+      print(e);
+      print(s);
+    }
   }
 
-  // ------------------------------------------------
-  // SUBMIT PRESCRIPTION
-  // ------------------------------------------------
+  // ================= SUBMIT =================
   Future<void> submitPrescriptionAndCompleteCall({
     required Map<String, dynamic> payload,
   }) async {
@@ -1062,25 +1443,20 @@ class AgoraCallController extends GetxController {
         return;
       }
 
-      await _repo.markAppointmentCallAsCompleted(
-        channelId,
-        callDurationSec.value,
-      );
+      try {
+        await _repo.markAppointmentCallAsCompleted(
+          channelId,
+          callDurationSec.value,
+        );
+        print("✅ call marked completed");
+      } catch (e) {
+        print("❌ call complete failed");
+      }
 
-      print("✅ call marked completed");
-
-      // 🔥 loader OFF
       isPrescriptionLoading.value = false;
 
-      // BLoC behavior: close overview + flow
-      try {
-        if (Get.key.currentState?.canPop() ?? false) {
-          Get.back();
-        }
-        if (Get.key.currentState?.canPop() ?? false) {
-          Get.back();
-        }
-      } catch (_) {}
+      if (Get.key.currentState?.canPop() ?? false) Get.back();
+      if (Get.key.currentState?.canPop() ?? false) Get.back();
     } catch (e, s) {
       isPrescriptionLoading.value = false;
       print("❌ submit error");
@@ -1090,9 +1466,6 @@ class AgoraCallController extends GetxController {
     }
   }
 
-  // ------------------------------------------------
-  // TIMERS
-  // ------------------------------------------------
   void _startCallTimer() {
     callDurationSec.value = 0;
     _callTimer?.cancel();
@@ -1104,11 +1477,14 @@ class AgoraCallController extends GetxController {
 
   void _startPatientJoinTimeout() {
     _patientJoinTimer?.cancel();
-    _patientJoinTimer = Timer(const Duration(seconds: 30), () {
-      if (!isRemoteUserJoined.value) {
-        _markCallDropped("patient_did_not_pick_up".tr);
-      }
-    });
+    _patientJoinTimer = Timer(
+      const Duration(seconds: 30),
+      () {
+        if (!isRemoteUserJoined.value) {
+          _markCallDropped("patient_did_not_pick_up".tr);
+        }
+      },
+    );
   }
 
   void _stopAllTimers() {
@@ -1118,9 +1494,6 @@ class AgoraCallController extends GetxController {
     _patientJoinTimer = null;
   }
 
-  // ------------------------------------------------
-  // CLEANUP
-  // ------------------------------------------------
   Future<void> _cleanupEngine() async {
     if (engine != null) {
       try {
@@ -1135,9 +1508,6 @@ class AgoraCallController extends GetxController {
     remoteUid.value = 0;
   }
 
-  // ------------------------------------------------
-  // UI CONTROLS
-  // ------------------------------------------------
   void toggleMute() {
     isMuted.value = !isMuted.value;
     engine?.muteLocalAudioStream(isMuted.value);

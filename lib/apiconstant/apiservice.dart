@@ -52,13 +52,27 @@
 import 'package:dio/dio.dart';
 import 'package:beh_doctor/shareprefs.dart';
 
+// class ApiService {
+//   final Dio _dio = Dio();
+
+//   ApiService() {
+//     _dio.options.connectTimeout = const Duration(seconds: 60);
+//     _dio.options.receiveTimeout = const Duration(seconds: 60);
+//   }
 class ApiService {
   final Dio _dio = Dio();
 
   ApiService() {
     _dio.options.connectTimeout = const Duration(seconds: 60);
     _dio.options.receiveTimeout = const Duration(seconds: 60);
+
+    // 🔥 ADD THIS — MOST IMPORTANT
+    _dio.options.validateStatus = (status) {
+      return status != null && status < 500;
+      // ✅ 200, 400, 401, 422 all treated as NORMAL responses
+    };
   }
+
 
   /// Internal method to get token safely
   Future<String?> _getToken() async {

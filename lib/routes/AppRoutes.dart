@@ -21,4 +21,5 @@ abstract class Routes {
   static const CallEndScreen = "/CallEndScreen";
   static const notifications = "/notifications";
   static const WithdrawAmountScreen = "/WithdrawAmountScreen";
+  static const PrescriptionFlowScreen = "/PrescriptionFlowScreen";
 }
