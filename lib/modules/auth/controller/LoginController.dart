@@ -41,9 +41,14 @@ class LoginController extends GetxController {
           print("🔵 Pre-OTP TOKEN Saved: ${res.data!.token!}");
         }
 
-        Get.to(
-          () => OtpScreen(traceId: traceId.value, bottomNavRoute: '/bottomNav'),
-        );
+      Get.to(
+  () => OtpScreen(
+    traceId: traceId.value,
+    bottomNavRoute: '/bottomNav',
+  ),
+  arguments: "${dialCode.value}${phone.value}", // ✅ phone pass
+);
+
       } else {
         Get.snackbar("error".tr, res.message ?? "unknown_error".tr);
       }
@@ -52,39 +57,5 @@ class LoginController extends GetxController {
     }
   }
 
-  //  Future<void> sendOtp() async {
-  //   if (phone.value.isEmpty) {
-  //     Get.snackbar('Error', 'Enter phone number');
-  //     return;
-  //   }
-
-  //   try {
-  //     isLoading.value = true;
-
-  //     // 🔹 Call API
-  //     final res = await repo.requestOtp(
-  //       phone: phone.value,
-  //       dialCode: dialCode.value,
-  //     );
-
-  //     print("📌 OTP API Response: ${res.toJson()}");
-
-  //     // 🔹 Check API Response
-  //     if (res.status == "success" && res.data != null) {
-  //       traceId.value = res.data?.traceId ?? "";
-
-  //       print("📌 TRACEID Saved: ${traceId.value}");
-
-  //       // 🔹 Navigate to OTP screen
-  //       Get.to(() => OtpScreen(
-  //             traceId: traceId.value,
-  //             bottomNavRoute: '/bottomNav',
-  //           ));
-  //     } else {
-  //       Get.snackbar("Error", res.message ?? "Unknown error");
-  //     }
-  //   } finally {
-  //     isLoading.value = false;
-  //   }
-  // }
+  
 }

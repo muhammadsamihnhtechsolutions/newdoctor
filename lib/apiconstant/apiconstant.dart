@@ -72,4 +72,11 @@ static const String walletStatistics = '$baseUrl/api/doctor/wallet/statistics';
   static const String privacyPolicy = '$baseUrl/beh_privacy_policy.html';
   static const String termsConditions = '$baseUrl/beh_terms_and_conditions.html';
     static const String bankAndMfsList = '$baseUrl/api/common/banks';
+   static const String medicineName = '$baseUrl/api/doctor/medication';
+   static const String investigationList =
+    '$baseUrl/api/doctor/investigation';
+
+
+
 }
+

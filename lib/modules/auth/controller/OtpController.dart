@@ -95,11 +95,21 @@ class OtpController extends GetxController {
     });
   }
 
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  //   startResendTimer();
+  // }
   @override
-  void onInit() {
-    super.onInit();
-    startResendTimer();
-  }
+void onInit() {
+  super.onInit();
+
+  // ✅ SAFE PHONE NUMBER RECEIVE
+  fullPhoneNumber.value = Get.arguments ?? "";
+
+  startResendTimer();
+}
+
 
   @override
   void onClose() {

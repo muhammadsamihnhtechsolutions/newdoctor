@@ -8,6 +8,7 @@ import 'package:beh_doctor/models/BankListResponse.dart';
 import 'package:beh_doctor/models/CommonApiResponceModel.dart';
 import 'package:beh_doctor/models/DistrictResponseModel.dart';
 import 'package:beh_doctor/models/DoctorProfileModel.dart';
+import 'package:beh_doctor/models/InvestigationModel.dart';
 import 'package:beh_doctor/models/MedicineTrackerModel.dart';
 
 import 'package:beh_doctor/models/TransectionModel.dart';
@@ -470,24 +471,25 @@ class ApiRepo {
     }
   }
   
-  Future<UpdateMedicationApiResponse> addMedication({
-    required Medication medication,
-  }) async {
-    try {
-      final apiRespnse = UpdateMedicationApiResponse.fromMap(
-        await _apiService.getPostResponse(
-          '${ApiConstants.baseUrl}/api/patient/medicineTracker',
-          medication.toMap(),
-        ) as Map<String, dynamic>,
-      );
-      return apiRespnse;
-    } catch (err) {
-      return UpdateMedicationApiResponse(
-        status: 'error',
-        message: 'An error occurred',
-      );
-    }
-  }
+  // Future<UpdateMedicationApiResponse> addMedication({
+  //   required Medication medication,
+  // }) async {
+  //   try {
+  //     final apiRespnse = UpdateMedicationApiResponse.fromMap(
+  //       await _apiService.getPostResponse(
+  //         '${ApiConstants.baseUrl}/api/patient/medicineTracker',
+  //         medication.toMap(),
+  //       ) as Map<String, dynamic>,
+  //     );
+  //     return apiRespnse;
+  //   } catch (err) {
+  //     return UpdateMedicationApiResponse(
+  //       status: 'error',
+  //       message: 'An error occurred',
+  //     );
+  //   }
+  // }
+ 
   Future<PrescriptionSubmittedResponse> submitPrescription(
     Map<String, dynamic> payload,
   ) async {
@@ -570,21 +572,7 @@ class WithdrawAccountRepo {
       );
     }
   }
-  //   Future<CommonResponseModel> addNewBankAccount(
-  //     Map<String, dynamic> parameters) async {
-  //   try {
-  //     final apiResponse = CommonResponseModel.fromJson(
-  //       await _apiService.getPostResponse(
-  //           ApiConstants.paymentAccount, parameters) as Map<String, dynamic>,
-  //     );
-  //     return apiResponse;
-  //   } catch (err) {
-  //     return CommonResponseModel(
-  //       status: 'error',
-  //       message: 'An error occurred',
-  //     );
-  //   }
-  // }
+
 
   Future<DistrictResponseModel> districtListResponse() async {
     try {
@@ -618,27 +606,48 @@ class WithdrawAccountRepo {
     }
   }
 }
-// class TestResultRepo {
-//   final ApiService _apiService = ApiService();
+class MedicationRepo {
+  final ApiService _apiService = ApiService();
 
-//   Future<TestResultResponseModel> getTestResultData() async {
-//     try {
-//       final raw = await _apiService.getGetResponse(ApiConstants.testResult);
+  /// 🔹 Get medicine list for dropdown
+  Future<List<Medication>> getMedicineList() async {
+    try {
+      final response = await _apiService.getGetResponse(
+        ApiConstants.medicineName,
+      );
 
-//       if (raw is Map<String, dynamic>) {
-//         return TestResultResponseModel.fromJson(raw);
-//       }
+      final apiResponse =
+          MedicationTrackerApiResponse.fromMap(response);
 
-//       return TestResultResponseModel(
-//         status: 'error',
-//         message: 'Invalid API response format',
-//       );
+      if (apiResponse.status == "success") {
+        return apiResponse.data?.docs ?? [];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print("❌ Medicine API Error: $e");
+      return [];
+    }
+  }
+ 
 
-//     } catch (e) {
-//       return TestResultResponseModel(
-//         status: 'error',
-//         message: 'An error occurred',
-//       );
-//     }
-//   }
-// }
+}
+class InvestigationRepo {
+  final _apiService = ApiService();
+
+  Future<List<Investigation>> getInvestigationList() async {
+    try {
+      final response = await _apiService.getGetResponse(
+        ApiConstants.investigationList,
+      ) as Map<String, dynamic>;
+
+      final apiResponse =
+          InvestigationApiResponse.fromMap(response);
+
+      return apiResponse.docs;
+    } catch (e) {
+      print("❌ getInvestigationList error: $e");
+      return [];
+    }
+  }
+}
