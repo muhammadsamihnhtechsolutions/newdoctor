@@ -52,26 +52,19 @@ class TransactionController extends GetxController {
 
   // Fetch transactions
   Future<void> fetchTransactions({int page = 1}) async {
-    try {
-      isLoading(true);
+  final params = {'page': page, 'limit': 20};
+  final response = await repo.getTransactionsList(params);
 
-      final params = {'page': page, 'limit': 20};
-      final response = await repo.getTransactionsList(params);
+  if (response.status == 'success' && response.transactionsData != null) {
+    transactions.value = response.transactionsData!.transactionList ?? [];
+    currentPage = response.transactionsData!.page ?? 1;
+    totalPages = response.transactionsData!.totalPages ?? 1;
 
-      if (response.status == 'success' && response.transactionsData != null) {
-        transactions.value = response.transactionsData!.transactionList ?? [];
-        currentPage = response.transactionsData!.page ?? 1;
-        totalPages = response.transactionsData!.totalPages ?? 1;
-
-        // Save transactions to SharedPreferences
-        saveTransactionsToPrefs(transactions);
-      } else {
-        Get.snackbar('error'.tr, response.message ?? 'something_went_wrong'.tr);
-      }
-    } finally {
-      isLoading(false);
-    }
+    saveTransactionsToPrefs(transactions);
+  } else {
+    Get.snackbar('error'.tr, response.message ?? 'something_went_wrong'.tr);
   }
+}
 
   // Save transactions to SharedPreferences
   Future<void> saveTransactionsToPrefs(List<Transaction> list) async {

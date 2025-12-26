@@ -177,7 +177,29 @@ Future<GetDoctorApiResponse> updateDoctorAvailability({required String status}) 
     }
   }
 
-  Future<dynamic> updateDoctorProfileBasicData(Map<String, dynamic> params) async {}
+   Future<GetDoctorApiResponse> updateDoctorProfileBasicData(
+      Map<String, dynamic> params) async {
+    print("📤 Sending Params: $params");
+
+    try {
+      final response = await _apiService.getPostResponse(
+        "${ApiConstants.baseUrl}/api/doctor/profile/updateBasicProfile",
+        params,
+      );
+ // 🔥 Raw API response print karo (YEHI CHAHIYE)
+    print("📥 RAW UPDATE RESPONSE: $response");
+
+   
+      return GetDoctorApiResponse.fromMap(response);
+    } catch (e) {
+      
+      print("❌ Repo Error: $e");
+      return GetDoctorApiResponse(
+        status: "error",
+        message: "Failed to update profile",
+      );
+    }
+  }
 }
 
 
@@ -222,29 +244,7 @@ class TransactionRepo {
   }
   // ----------------------------------------------------
   /// UPDATE BASIC PROFILE → PHOTO, NAME, CONTACT, GENDER
- Future<GetDoctorApiResponse> updateDoctorProfileBasicData(
-      Map<String, dynamic> params) async {
-    print("📤 Sending Params: $params");
 
-    try {
-      final response = await _apiService.getPostResponse(
-        "${ApiConstants.baseUrl}/api/doctor/profile/updateBasicProfile",
-        params,
-      );
- // 🔥 Raw API response print karo (YEHI CHAHIYE)
-    print("📥 RAW UPDATE RESPONSE: $response");
-
-   
-      return GetDoctorApiResponse.fromMap(response);
-    } catch (e) {
-      
-      print("❌ Repo Error: $e");
-      return GetDoctorApiResponse(
-        status: "error",
-        message: "Failed to update profile",
-      );
-    }
-  }
   // Appointmentlistrepo
 }
 

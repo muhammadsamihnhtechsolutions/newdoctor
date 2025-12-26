@@ -10,6 +10,7 @@ class OtpScreen extends StatelessWidget {
   final String bottomNavRoute;
 
   OtpScreen({super.key, required this.traceId, required this.bottomNavRoute});
+  
 
   @override
   Widget build(BuildContext context) {
