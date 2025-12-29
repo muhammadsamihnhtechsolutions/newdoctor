@@ -2,6 +2,7 @@
 import 'package:beh_doctor/modules/auth/controller/LogOutController.dart';
 import 'package:beh_doctor/views/DoctorProfileScreen.dart';
 import 'package:beh_doctor/views/EarningHistoryScreen.dart';
+import 'package:beh_doctor/views/LanguageSelecionScreen.dart';
 import 'package:beh_doctor/views/WithdrawScreen.dart';
 import 'package:beh_doctor/widgets/DoctorHeaderWidget.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,10 @@ class MorePage extends StatelessWidget {
               // ---------------- SETTINGS ----------------
               sectionTitle("settings".tr),
               menuTile("change_mobile_number".tr, Icons.phone_android),
-              menuTile("language".tr, Icons.language),
+              menuTile("language".tr, Icons.language,  onTap: () {
+                  Get.to(() => LanguageSelectionScreen());
+                },
+              ),
               menuTile(
                 "profile".tr,
                 Icons.person,

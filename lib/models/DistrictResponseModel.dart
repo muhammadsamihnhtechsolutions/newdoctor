@@ -1,6 +1,3 @@
-// To parse this JSON data, do
-//
-//     final districtResponseModel = districtResponseModelFromJson(jsonString);
 
 import 'dart:convert';
 
