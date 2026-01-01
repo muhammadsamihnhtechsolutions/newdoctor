@@ -1,5 +1,6 @@
 
 import 'package:beh_doctor/modules/auth/controller/LogOutController.dart';
+import 'package:beh_doctor/theme/Appcolars.dart';
 import 'package:beh_doctor/views/DoctorProfileScreen.dart';
 import 'package:beh_doctor/views/EarningHistoryScreen.dart';
 import 'package:beh_doctor/views/LanguageSelecionScreen.dart';
@@ -107,21 +108,21 @@ class MorePage extends StatelessWidget {
       },
       icon: const Icon(
         Icons.logout,
-        color: Color(0xFF008541),
+        color:AppColors.white,
         size: 20,
       ),
       label: Text(
         "logout".tr,
         style: const TextStyle(
-          color: Color(0xFF008541),
+              color:AppColors.white,
           fontSize: 15,
           fontWeight: FontWeight.w600,
         ),
       ),
       style: OutlinedButton.styleFrom(
-        backgroundColor: Colors.white,
+        backgroundColor:  Color(0xFF008541),
         side: const BorderSide(
-          color: Color(0xFF008541),
+          color:AppColors.white,
           width: 1.2,
         ),
         shape: RoundedRectangleBorder(

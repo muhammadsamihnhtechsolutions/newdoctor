@@ -1,3 +1,6 @@
+
+// import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
+// import 'package:beh_doctor/views/CreateProfileScreen.dart';
 // import 'package:beh_doctor/views/OtpScreen.dart';
 // import 'package:get/get.dart';
 // import 'package:beh_doctor/repo/AuthRepo.dart';
@@ -57,7 +60,20 @@
 //     }
 //   }
 
-  
+//   Future<void> handlePostLoginNavigation() async {
+//   final doctorController = Get.put(DoctorProfileController());
+
+//   await doctorController.fetchDoctorProfile();
+
+//   if (doctorController.doctor.value == null) {
+//     // ❌ Doctor profile EXIST NAHI
+//     Get.offAll(() => CreateProfileScreen());
+//   } else {
+//     // ✅ Doctor profile EXIST karta hai
+//     Get.offAllNamed('/bottomNav');
+//   }
+// }
+
 // }
 
 import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
@@ -77,9 +93,12 @@ class LoginController extends GetxController {
   var traceId = ''.obs;
   var deviceToken = ''.obs;
 
+  /// 🔒 Bangladesh rule → +880 ke baad 10 digits
+  bool get isPhoneValid => phone.value.length == 10;
+
   // 🔹 Request OTP
   Future<void> sendOtp() async {
-    if (phone.value.isEmpty) {
+    if (!isPhoneValid) {
       Get.snackbar('error'.tr, 'enter_phone_number'.tr);
       return;
     }
@@ -92,27 +111,21 @@ class LoginController extends GetxController {
         dialCode: dialCode.value,
       );
 
-      print("📌 OTP API Response: ${res.toJson()}");
-
       if (res.status == "success" && res.data != null) {
         traceId.value = res.data?.traceId ?? "";
-        print("📌 TRACEID Saved: ${traceId.value}");
 
-        //  IMPORTANT FIX
         if (res.data?.token != null) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('preOtpToken', res.data!.token!);
-          print("🔵 Pre-OTP TOKEN Saved: ${res.data!.token!}");
         }
 
-      Get.to(
-  () => OtpScreen(
-    traceId: traceId.value,
-    bottomNavRoute: '/bottomNav',
-  ),
-  arguments: "${dialCode.value}${phone.value}", // ✅ phone pass
-);
-
+        Get.to(
+          () => OtpScreen(
+            traceId: traceId.value,
+            bottomNavRoute: '/bottomNav',
+          ),
+          arguments: "${dialCode.value}${phone.value}",
+        );
       } else {
         Get.snackbar("error".tr, res.message ?? "unknown_error".tr);
       }
@@ -122,17 +135,14 @@ class LoginController extends GetxController {
   }
 
   Future<void> handlePostLoginNavigation() async {
-  final doctorController = Get.put(DoctorProfileController());
+    final doctorController = Get.put(DoctorProfileController());
 
-  await doctorController.fetchDoctorProfile();
+    await doctorController.fetchDoctorProfile();
 
-  if (doctorController.doctor.value == null) {
-    // ❌ Doctor profile EXIST NAHI
-    Get.offAll(() => CreateProfileScreen());
-  } else {
-    // ✅ Doctor profile EXIST karta hai
-    Get.offAllNamed('/bottomNav');
+    if (doctorController.doctor.value == null) {
+      Get.offAll(() => CreateProfileScreen());
+    } else {
+      Get.offAllNamed('/bottomNav');
+    }
   }
-}
-
 }

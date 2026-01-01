@@ -194,7 +194,7 @@ class AppTranslations extends Translations {
       'firebase_init_failed': 'Failed to initialize Firebase.',
 
       // Status
-      'my_status': 'My status',
+      'my_Status': 'My Status',
       'online': 'Online',
       'offline': 'Offline',
 

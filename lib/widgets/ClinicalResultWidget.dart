@@ -144,6 +144,7 @@ class ClinicalResultWidget extends StatelessWidget {
                       test.title ?? "untitled".tr,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
+                      
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

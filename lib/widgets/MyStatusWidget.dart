@@ -141,7 +141,7 @@ class MyStatusWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "my_status".tr,
+              "my_Status".tr,
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
