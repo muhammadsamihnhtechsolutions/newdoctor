@@ -66,6 +66,9 @@ static const String walletStatistics = '$baseUrl/api/doctor/wallet/statistics';
   static const String imageBaseUrl = 'https://beh-app.s3.eu-north-1.amazonaws.com/';
   static const String homeBanners = '$baseUrl/api/common/banners';
   static const String specialtiesList = '$baseUrl/api/common/specialties';
+  
+  static const String hospitalsList =
+      '$baseUrl/api/common/hospitalList';
   static const String districtList = '$baseUrl/api/common/districtList';
   static const String banksList = '$baseUrl/api/common/banks';
   static const String paymentTerms = '$baseUrl/beh_payment_terms.html';

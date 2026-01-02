@@ -12,6 +12,7 @@ import 'package:beh_doctor/models/InvestigationModel.dart';
 import 'package:beh_doctor/models/MedicineTrackerModel.dart';
 
 import 'package:beh_doctor/models/TransectionModel.dart';
+import 'package:beh_doctor/models/UploadProfileImage.dart';
 import 'package:beh_doctor/models/VerifyOtpModel.dart';
 import 'package:beh_doctor/models/WalletStatistics.dart';
 import 'package:beh_doctor/models/WithdrawAccountListResponse.dart';
@@ -109,9 +110,13 @@ class AuthRepo {
     }
   }
 }
+
 class DoctorProfileRepo {
   final ApiService _apiService = ApiService();
 
+  // =================================================
+  //             GET DOCTOR PROFILE
+  // =================================================
   Future<GetDoctorApiResponse> getDoctorProfileData() async {
     try {
       final response = await _apiService.getGetResponse(
@@ -127,57 +132,64 @@ class DoctorProfileRepo {
     }
   }
 
-Future<GetDoctorApiResponse> updateDoctorAvailability({required String status}) async {
-  try {
-    print("🔄 Updating doctor availability to: $status");
-
-    final response = await _apiService.getPatchResponse(
-      "${ApiConstants.baseUrl}/api/doctor/profile/updateAvailabilityStatus/$status",
-      {},
-    );
-
-    print("✅ Availability Update Response: $response");
-
-    final apiResponse = GetDoctorApiResponse.fromMap(
-      response as Map<String, dynamic>,
-    );
-
-    return apiResponse;
-  } catch (err) {
-    print("❌ Error updating availability: $err");
-
-    return GetDoctorApiResponse(
-      status: 'error',
-      message: 'An error occurred',
-    );
-  }
-}
-
-  /// --------------------------------------------------------
-  /// Upload Doctor Profile Image (Base64)
-  /// --------------------------------------------------------
-  Future<GetDoctorApiResponse> uploadProfileImageInBase64(String base64Image) async {
+  // =================================================
+  //         UPDATE AVAILABILITY STATUS
+  // =================================================
+  Future<GetDoctorApiResponse> updateDoctorAvailability({
+    required String status,
+  }) async {
     try {
-      // Sending POST request
-      final response = await _apiService.getPostResponse(
-        "${ApiConstants.baseUrl}/api/doctor/profile/uploadProfilePhoto",
-        {
-          "base64String": base64Image,
-        },
+      print("🔄 Updating doctor availability to: $status");
+
+      final response = await _apiService.getPatchResponse(
+        "${ApiConstants.baseUrl}/api/doctor/profile/updateAvailabilityStatus/$status",
+        {},
       );
 
-      // Converting API response to Model
-      return GetDoctorApiResponse.fromMap(response as Map<String, dynamic>);
-    } catch (e) {
-      // Safe fallback response
+      print("✅ Availability Update Response: $response");
+
+      return GetDoctorApiResponse.fromMap(
+        response as Map<String, dynamic>,
+      );
+    } catch (err) {
+      print("❌ Error updating availability: $err");
+
       return GetDoctorApiResponse(
-        status: "error",
-        message: "An error occurred while uploading image",
+        status: 'error',
+        message: 'An error occurred',
       );
     }
   }
 
-   Future<GetDoctorApiResponse> updateDoctorProfileBasicData(
+  // =================================================
+  //           UPLOAD PROFILE IMAGE (BASE64)
+  // =================================================
+Future<UploadProfileImageResponse> uploadProfileImageInBase64(
+    String base64Image) async {
+  try {
+    final response = await _apiService.getPostResponse(
+      "${ApiConstants.baseUrl}/api/doctor/profile/uploadProfilePhoto",
+      {
+        "base64String": base64Image,
+      },
+    );
+
+    return UploadProfileImageResponse.fromJson(
+      response as Map<String, dynamic>,
+    );
+  } catch (e) {
+    return UploadProfileImageResponse(
+      status: "error",
+      message: "Image upload failed",
+    );
+  }
+}
+
+
+  // =================================================
+  //           UPDATE / CREATE BASIC PROFILE
+  // =================================================
+  Future<GetDoctorApiResponse> updateDoctorProfileBasicData(
       Map<String, dynamic> params) async {
     print("📤 Sending Params: $params");
 
@@ -186,13 +198,11 @@ Future<GetDoctorApiResponse> updateDoctorAvailability({required String status}) 
         "${ApiConstants.baseUrl}/api/doctor/profile/updateBasicProfile",
         params,
       );
- // 🔥 Raw API response print karo (YEHI CHAHIYE)
-    print("📥 RAW UPDATE RESPONSE: $response");
 
-   
+      print("📥 RAW UPDATE RESPONSE: $response");
+
       return GetDoctorApiResponse.fromMap(response);
     } catch (e) {
-      
       print("❌ Repo Error: $e");
       return GetDoctorApiResponse(
         status: "error",
@@ -200,7 +210,52 @@ Future<GetDoctorApiResponse> updateDoctorAvailability({required String status}) 
       );
     }
   }
+
+  // =================================================
+  //                GET SPECIALTIES
+  // =================================================
+  Future<List<DoctorSpecialty>> getDoctorSpecialties() async {
+    try {
+      final response = await _apiService.getGetResponse(
+        ApiConstants.specialtiesList,
+      );
+
+      if (response['status'] == 'success' && response['data'] != null) {
+        return (response['data'] as List)
+            .map((e) => DoctorSpecialty.fromMap(e))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      print("❌ Repo Error (Specialties): $e");
+      return [];
+    }
+  }
+
+  // =================================================
+  //                  GET HOSPITALS
+  // =================================================
+  Future<List<DoctorHospital>> getHospitals() async {
+    try {
+      final response = await _apiService.getGetResponse(
+        ApiConstants.hospitalsList,
+      );
+
+      if (response['status'] == 'success' && response['data'] != null) {
+        return (response['data'] as List)
+            .map((e) => DoctorHospital.fromMap(e))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      print("❌ Repo Error (Hospitals): $e");
+      return [];
+    }
+  }
 }
+
+// ================= SPECIALTIES =================
+
 
 
 

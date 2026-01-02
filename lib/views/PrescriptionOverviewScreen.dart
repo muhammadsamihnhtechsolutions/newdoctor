@@ -491,9 +491,9 @@ class PrescriptionOverviewScreen extends StatelessWidget {
                       title: 'confirm'.tr,
                       color: _primaryColor,
                       onTap: () {
-                        controller.submitPrescriptionAndCompleteCall(
-                          payload: payload,
-                        );
+                        // controller.submitPrescriptionAndCompleteCall(
+                        //   payload: payload,
+                        // );
                       },
                     ),
                   ),

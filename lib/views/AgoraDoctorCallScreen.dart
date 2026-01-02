@@ -471,6 +471,106 @@ class _AgoraDoctorCallScreenState extends State<AgoraDoctorCallScreen> {
               ),
 
               /// BOTTOM CONTROLS
+              /// /// PATIENT INFO BAR (image wali UI)
+/// PATIENT INFO BAR (image wali UI)
+if (controller.isRemoteUserJoined.value)
+  Positioned(
+    left: 16,
+    right: 16,
+    bottom: 110,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.60),
+
+   // ✅ opacity WORKING
+        borderRadius: BorderRadius.circular(40),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          /// PROFILE IMAGE
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.green, width: 3),
+            ),
+            child: ClipOval(
+              child: (controller.currentAppointment?.patient?.photo != null &&
+                      controller.currentAppointment!.patient!.photo!.isNotEmpty)
+                  ? Image.network(
+                      "${ApiConstants.imageBaseUrl}${controller.currentAppointment!.patient!.photo}",
+                      width: 46,
+                      height: 46,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      width: 46,
+                      height: 46,
+                      color: Colors.grey.shade300,
+                      child:
+                          const Icon(Icons.person, color: Colors.white, size: 26),
+                    ),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          /// NAME + TIMER
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  controller.currentAppointment?.patient?.name ?? "Unknown",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _formatStopwatchTime(
+                    controller.callDurationSec.value,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          /// VOICE WAVE (speaker ON/OFF)
+          Obx(() {
+            return Container(
+              height: 42,
+              width: 42,
+              decoration: const BoxDecoration(
+                color: Colors.green, // ✅ wave visible
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: controller.isSpeakerOn.value
+                    ? const _VoiceWave(isActive: true)
+                    : const _VoiceWave(isActive: false),
+              ),
+            );
+          }),
+        ],
+      ),
+    ),
+  ),
+
+// showpatatintprofilename
               Positioned(
                 left: 0,
                 right: 0,
@@ -565,5 +665,77 @@ class AgoraCallButton extends StatelessWidget {
         child: Icon(icon, color: iconColor, size: 26),
       ),
     );
+  }
+}
+
+// wavekiwidget
+class _VoiceWave extends StatefulWidget {
+  final bool isActive;
+  const _VoiceWave({this.isActive = true});
+
+  @override
+  State<_VoiceWave> createState() => _VoiceWaveState();
+}
+
+class _VoiceWaveState extends State<_VoiceWave>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    if (widget.isActive) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _VoiceWave oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive) {
+      _controller.repeat();
+    } else {
+      _controller.stop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 20,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(4, (index) {
+          return AnimatedBuilder(
+            animation: _controller,
+            builder: (_, __) {
+              final value = (_controller.value + index * 0.2) % 1;
+              final height = 6 + (value * 10);
+
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                width: 3,
+                height: height, // ✅ ACTUAL animated height
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              );
+            },
+          );
+        }),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
