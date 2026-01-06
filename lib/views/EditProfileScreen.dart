@@ -540,7 +540,8 @@
 // }
 import 'package:beh_doctor/views/BasicInfoScreen.dart';
 import 'package:beh_doctor/views/ConsultationFeeTab.dart';
-import 'package:beh_doctor/views/ExperinceTabScreen.dart';
+import 'package:beh_doctor/views/ExprienceSetupScreen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -611,7 +612,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const ConsultationFeeTab(),
 
                 /// 2 → EXPERIENCE
-                const ExperienceTab(),
+                 ExperienceSetupScreen(),
               ],
             ),
           ),

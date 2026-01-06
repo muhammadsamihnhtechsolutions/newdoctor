@@ -400,9 +400,12 @@ class DoctorProfileData {
 
       /// ✅ ONLY FIX: invalid "undefined" image
 photo: (map['photo'] != null &&
-        map['photo'].toString().isNotEmpty)
+        map['photo'].toString().isNotEmpty &&
+        map['photo'].toString() != 'null' &&
+        !map['photo'].toString().contains('undefined'))
     ? map['photo'].toString()
     : null,
+
 
 
       about: map['about']?.toString(),

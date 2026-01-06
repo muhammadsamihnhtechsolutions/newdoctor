@@ -706,3 +706,26 @@ class InvestigationRepo {
     }
   }
 }
+class ExperienceRepo {
+  final ApiService _apiService = ApiService();
+
+  Future<GetDoctorApiResponse> uploadDoctorExperienceData(
+    Map<String, dynamic> parameters,
+  ) async {
+    try {
+      final response = await _apiService.getPostResponse(
+        '${ApiConstants.baseUrl}/api/doctor/profile/updateExperience',
+        parameters,
+      );
+
+      return GetDoctorApiResponse.fromMap(
+        response as Map<String, dynamic>,
+      );
+    } catch (e) {
+      return GetDoctorApiResponse(
+        status: 'error',
+        message: 'Something went wrong',
+      );
+    }
+  }
+}
