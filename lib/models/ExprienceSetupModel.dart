@@ -18,14 +18,15 @@ class ExperienceSetupModel {
   });
 
   /// 🔴 API body banane ke liye
-  Map<String, dynamic> toJson() {
-    return {
-      "hospitalName": hospitalName.text,
-      "designation": designationController.text,
-      "department": departmentController.text,
-      "startDate": startDateController.text,
-      "endDate": iStillWorkHere ? null : endDateController.text,
-      "iStillWorkHere": iStillWorkHere,
-    };
-  }
+Map<String, dynamic> toJson() {
+  return {
+    "hospitalName": hospitalName.text,
+    "designation": designationController.text,
+    "department": departmentController.text,
+    "startDate": startDateController.text,
+    "endDate": iStillWorkHere ? null : endDateController.text,
+    "currentlyWorkingHere": iStillWorkHere, // ✅ FIX
+  };
+}
+
 }

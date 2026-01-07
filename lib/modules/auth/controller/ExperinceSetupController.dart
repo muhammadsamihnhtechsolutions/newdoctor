@@ -81,20 +81,20 @@ class ExperienceSetupController extends GetxController {
 
   Future<void> submitExperience() async {
     if (!_validate()) return;
-
-    final body = {
-      "records": experienceList.map((e) {
-        return {
-          "hospitalName": e.hospitalName.text.trim(),
-          "designation": e.designationController.text.trim(),
-          "department": e.departmentController.text.trim(),
-          "startDate": e.startDateController.text.trim(),
-          "endDate":
-              e.iStillWorkHere ? null : e.endDateController.text.trim(),
-          "iStillWorkHere": e.iStillWorkHere,
-        };
-      }).toList(),
+final body = {
+  "records": experienceList.map((e) {
+    return {
+      "hospitalName": e.hospitalName.text.trim(),
+      "designation": e.designationController.text.trim(),
+      "department": e.departmentController.text.trim(),
+      "startDate": e.startDateController.text.trim(),
+      "endDate":
+          e.iStillWorkHere ? null : e.endDateController.text.trim(),
+      "currentlyWorkingHere": e.iStillWorkHere, // ✅ FIX
     };
+  }).toList(),
+};
+
 
     log("📦 API BODY => $body");
 

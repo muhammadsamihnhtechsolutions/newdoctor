@@ -186,16 +186,14 @@ class LoginScreen extends StatelessWidget {
         ],
       ),
 
-      // ✅ FOCUS / CURSOR FIX ADDED (ONLY CHANGE)
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          FocusScope.of(context).unfocus(); // 👈 cursor remove
+          FocusScope.of(context).unfocus();
         },
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -221,10 +219,11 @@ class LoginScreen extends StatelessWidget {
                       labelStyle: TextStyle(color: Colors.grey.shade600),
                       filled: true,
                       fillColor: Colors.grey.shade100,
-                      errorText: controller.phone.value.isNotEmpty &&
-                              controller.phone.value.length < 10
-                          ? 'enter_phone_number'.tr
-                          : null,
+                      errorText:
+                          controller.loginInputPhone.value.isNotEmpty &&
+                                  controller.loginInputPhone.value.length < 10
+                              ? 'enter_phone_number'.tr
+                              : null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide(color: appGreen),
@@ -243,8 +242,8 @@ class LoginScreen extends StatelessWidget {
                     cursorColor: appGreen,
 
                     onChanged: (phone) {
-                      controller.phone.value = phone.number;
-                      controller.dialCode.value = '+880';
+                      controller.loginInputPhone.value = phone.number;
+                      controller.loginInputDialCode.value = '+880';
                     },
                   ),
                 ),
@@ -264,12 +263,10 @@ class LoginScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-
                       onPressed: controller.isLoading.value ||
                               !controller.isPhoneValid
                           ? null
                           : () => controller.sendOtp(),
-
                       child: controller.isLoading.value
                           ? const CircularProgressIndicator(
                               color: Colors.white,

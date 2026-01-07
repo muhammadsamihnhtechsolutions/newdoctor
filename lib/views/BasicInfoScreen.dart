@@ -309,7 +309,7 @@ class _BasicInfoTabState extends State<BasicInfoTab> {
       expCtrl.text = d.experienceInYear ?? "";
       bmdcCtrl.text = d.bmdcCode ?? "";
       aboutCtrl.text = d.about ?? "";
-      selectedGender = d.gender ?? "male";
+      selectedGender = d.gender;
     }
 
     selectedSpecialties = controller.selectedSpecialtyIds.toList();
@@ -368,7 +368,7 @@ class _BasicInfoTabState extends State<BasicInfoTab> {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => FocusScope.of(context).unfocus(), // ✅ keyboard close
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -388,6 +388,19 @@ class _BasicInfoTabState extends State<BasicInfoTab> {
         } else {
           avatarImage = const AssetImage("assets/images/user.png");
         }
+
+        /// ---------- SAFE VALUES (FIX) ----------
+        const genderItems = ["male", "female"];
+        final safeGender =
+            genderItems.contains(selectedGender) ? selectedGender : null;
+
+        final specialtyIds =
+            controller.specialtyList.map((e) => e.id).toSet();
+
+        final safeSpecialty = selectedSpecialties.isNotEmpty &&
+                specialtyIds.contains(selectedSpecialties.first)
+            ? selectedSpecialties.first
+            : null;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -430,32 +443,24 @@ class _BasicInfoTabState extends State<BasicInfoTab> {
 
               Row(
                 children: [
-                  Expanded(
-                    child:
-                        _field("experience_years".tr, expCtrl),
-                  ),
+                  Expanded(child: _field("experience_years".tr, expCtrl)),
                   const SizedBox(width: 14),
-                  Expanded(
-                    child: _field("bmdc_code".tr, bmdcCtrl),
-                  ),
+                  Expanded(child: _field("bmdc_code".tr, bmdcCtrl)),
                 ],
               ),
 
               const SizedBox(height: 8),
 
+              /// -------- GENDER (FIXED) --------
               DropdownButtonFormField<String>(
-                value: selectedGender,
+                value: safeGender,
                 decoration: _inputDecoration("gender".tr),
                 dropdownColor: Colors.white,
-                style: const TextStyle(color: _green),
-                items: ["male", "female"]
+                items: genderItems
                     .map(
                       (e) => DropdownMenuItem(
                         value: e,
-                        child: Text(
-                          e.tr,
-                          style: const TextStyle(color: _green),
-                        ),
+                        child: Text(e.tr),
                       ),
                     )
                     .toList(),
@@ -464,26 +469,23 @@ class _BasicInfoTabState extends State<BasicInfoTab> {
 
               const SizedBox(height: 16),
 
+              /// -------- SPECIALTY (FIXED) --------
               DropdownButtonFormField<String>(
-                value: selectedSpecialties.isNotEmpty
-                    ? selectedSpecialties.first
-                    : null,
+                value: safeSpecialty,
                 decoration: _inputDecoration("specialty".tr),
                 dropdownColor: Colors.white,
-                style: const TextStyle(color: _green),
                 items: controller.specialtyList
                     .map(
                       (s) => DropdownMenuItem(
                         value: s.id,
-                        child: Text(
-                          s.title ?? "",
-                          style: const TextStyle(color: _green),
-                        ),
+                        child: Text(s.title ?? ""),
                       ),
                     )
                     .toList(),
                 onChanged: (v) {
-                  if (v != null) selectedSpecialties = [v];
+                  if (v != null) {
+                    selectedSpecialties = [v];
+                  }
                 },
               ),
 
@@ -521,27 +523,46 @@ class _BasicInfoTabState extends State<BasicInfoTab> {
     );
   }
 
-  Future<void> updateProfile() async {
-    final params = {
-      "name": nameCtrl.text.trim(),
-      "about": aboutCtrl.text.trim(),
-      "experienceInYear": expCtrl.text.trim(),
-      "bmdcCode": bmdcCtrl.text.trim(),
-      "gender": selectedGender,
-      "specialty": selectedSpecialties,
-    };
-
-    final ok = await controller.updateBasicInfo(params);
-    if (ok) {
-      Get.snackbar(
-        "success".tr,
-        "profile_updated".tr,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+Future<void> updateProfile() async {
+  if (selectedSpecialties.isEmpty) {
+    Get.snackbar("error".tr, "please_select_specialty".tr);
+    return;
   }
 
-  // ================= FIELDS =================
+  if (controller.selectedHospitalId.value.isEmpty) {
+    Get.snackbar("error".tr, "please_select_hospital".tr);
+    return;
+  }
+    if (selectedImage != null) {
+      final base64 =
+          base64Encode(selectedImage!.readAsBytesSync());
+
+      await controller.uploadProfileImage(base64);
+    }
+  final params = {
+    "name": nameCtrl.text.trim(),
+    "about": aboutCtrl.text.trim(),
+    "experienceInYear": expCtrl.text.trim(),
+    "bmdcCode": bmdcCtrl.text.trim(),
+    "gender": selectedGender,
+
+    // ✅ FIX 1: LIST ❌ → STRING ✅
+    "specialty": selectedSpecialties.first,
+
+    // ✅ FIX 2: hospital REQUIRED by backend
+    "hospital": controller.selectedHospitalId.value,
+  };
+
+  final ok = await controller.updateBasicInfo(params);
+  if (ok) {
+    Get.snackbar(
+      "success".tr,
+      "profile_updated".tr,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+}
+
 
   Widget _field(String label, TextEditingController c,
       {int maxLines = 1}) {
@@ -551,8 +572,6 @@ class _BasicInfoTabState extends State<BasicInfoTab> {
         controller: c,
         minLines: 1,
         maxLines: maxLines,
-        cursorColor: _green,
-        style: const TextStyle(color: Colors.black),
         decoration: _inputDecoration(label),
       ),
     );
@@ -561,13 +580,9 @@ class _BasicInfoTabState extends State<BasicInfoTab> {
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(
+        labelStyle: const TextStyle(
         color: _green,
         fontWeight: FontWeight.w500,
-      ),
-      floatingLabelStyle: const TextStyle(
-        color: _green,
-        fontWeight: FontWeight.w600,
       ),
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

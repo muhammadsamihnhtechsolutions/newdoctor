@@ -25,7 +25,7 @@ class AuthRepo {
   final ApiService _apiService = ApiService();
 
   // --------------------------------------------------------
-  // 🔹 REQUEST OTP (NO EXTRA VALUE PARAMETER)
+  // 🔹 REQUEST OTP (LOGIN)
   // --------------------------------------------------------
   Future<VerifyOtpApiResponse> requestOtp({
     required String phone,
@@ -36,16 +36,12 @@ class AuthRepo {
         '${ApiConstants.baseUrl}/api/doctor/auth/request',
         {
           "phone": phone,
-          "dialCode": dialCode,        // MUST include "+"
+          "dialCode": dialCode,
         },
       );
 
-      log("🔵 Request OTP Response: $response");
-
       return VerifyOtpApiResponse.fromMap(response);
-
     } catch (err) {
-      log("🔴 Request OTP ERROR: $err");
       return VerifyOtpApiResponse(
         status: 'error',
         message: 'Failed to request OTP',
@@ -54,12 +50,13 @@ class AuthRepo {
   }
 
   // --------------------------------------------------------
-  // 🔹 VERIFY OTP
+  // 🔹 VERIFY OTP (LOGIN)
   // --------------------------------------------------------
   Future<VerifyOtpApiResponse> verifyOtp({
     required String traceId,
     required String otpCode,
-    required String deviceToken, String? preToken,
+    required String deviceToken,
+    String? preToken,
   }) async {
     try {
       final verifyOtpModel = VerifyOtpModel(
@@ -73,13 +70,8 @@ class AuthRepo {
         verifyOtpModel.toMap(),
       );
 
-      log("🟡 Verify OTP Request: ${verifyOtpModel.toMap()}");
-      log("🟢 Verify OTP Response: $response");
-
       return VerifyOtpApiResponse.fromMap(response);
-
     } catch (err) {
-      log("🔴 Verify OTP ERROR: $err");
       return VerifyOtpApiResponse(
         status: 'error',
         message: 'Failed to verify OTP',
@@ -87,8 +79,61 @@ class AuthRepo {
     }
   }
 
+  // ========================================================
+  // 🔹 CHANGE PHONE → REQUEST OTP
+  // ========================================================
+Future<String?> requestChangePhoneOtp({
+  required String currentDialCode,
+  required String currentPhone,
+  required String newDialCode,
+  required String newPhone,
+}) async {
+  final res = await _apiService.getPostResponse(
+    '${ApiConstants.baseUrl}/api/doctor/changePhone/request',
+    {
+      "currentDialCode": currentDialCode,
+      "currentPhone": currentPhone,
+      "dialCode": newDialCode,
+      "phone": newPhone,
+    },
+  ) as Map<String, dynamic>;
+
+  if (res['status'] == 'success') {
+    return res['data']?['traceId'];
+  }
+  return null;
+}
+
+
+  // ========================================================
+  // 🔹 CHANGE PHONE → VERIFY OTP
+  // ========================================================
+  Future<VerifyOtpApiResponse> verifyChangePhoneOtp({
+    required String traceId,
+    required String otpCode,
+  }) async {
+    try {
+      final model = VerifyOtpModel(
+        traceId: traceId,
+        code: otpCode,
+      );
+
+      final response = await _apiService.getPostResponse(
+        '${ApiConstants.baseUrl}/api/doctor/changePhone/verify',
+        model.toMap(),
+      );
+
+      return VerifyOtpApiResponse.fromMap(response);
+    } catch (_) {
+      return VerifyOtpApiResponse(
+        status: 'error',
+        message: 'Failed to verify change phone OTP',
+      );
+    }
+  }
+
   // --------------------------------------------------------
-  // 🔹 RESEND OTP
+  // 🔹 RESEND OTP (LOGIN + CHANGE PHONE — BOTH)
   // --------------------------------------------------------
   Future<void> resendOtp({
     required String traceId,
@@ -102,14 +147,10 @@ class AuthRepo {
           "dialCode": dialCode,
         },
       );
-
-      log("🔄 OTP Resent Successfully");
-
-    } catch (err) {
-      log("🔴 Resend OTP ERROR: $err");
-    }
+    } catch (_) {}
   }
 }
+
 
 class DoctorProfileRepo {
   final ApiService _apiService = ApiService();
@@ -729,3 +770,4 @@ class ExperienceRepo {
     }
   }
 }
+

@@ -538,6 +538,7 @@
 //         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
 //       );
 // }
+import 'package:beh_doctor/theme/Appcolars.dart';
 import 'package:beh_doctor/views/BasicInfoScreen.dart';
 import 'package:beh_doctor/views/ConsultationFeeTab.dart';
 import 'package:beh_doctor/views/ExprienceSetupScreen.dart';
@@ -561,6 +562,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: Colors.white,
 
       appBar: AppBar(
+        backgroundColor: AppColors.white,
         title: Text("edit_profile".tr),
         centerTitle: true,
       ),

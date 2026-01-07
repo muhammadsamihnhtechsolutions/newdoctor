@@ -76,30 +76,107 @@
 
 // }
 
-import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
-import 'package:beh_doctor/views/CreateProfileScreen.dart';
-import 'package:beh_doctor/views/OtpScreen.dart';
+// import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
+// import 'package:beh_doctor/views/CreateProfileScreen.dart';
+// import 'package:beh_doctor/views/OtpScreen.dart';
+// import 'package:get/get.dart';
+// import 'package:beh_doctor/repo/AuthRepo.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+
+// class LoginController extends GetxController {
+//   final AuthRepo repo = AuthRepo();
+
+//   var phone = ''.obs;
+//   var dialCode = '+880'.obs;
+//   var isLoading = false.obs;
+
+//   var traceId = ''.obs;
+//   var deviceToken = ''.obs;
+//   static LoginController get to => Get.find<LoginController>();
+//   /// 🔒 Bangladesh rule → +880 ke baad 10 digits
+//   /// 
+//   bool get isPhoneValid => phone.value.length == 10;
+
+//   // 🔹 Request OTP
+//   Future<void> sendOtp() async {
+//     if (!isPhoneValid) {
+//       Get.snackbar('error'.tr, 'enter_phone_number'.tr);
+//       return;
+//     }
+
+//     try {
+//       isLoading.value = true;
+
+//       final res = await repo.requestOtp(
+//         phone: phone.value,
+//         dialCode: dialCode.value,
+//       );
+
+//       if (res.status == "success" && res.data != null) {
+//         traceId.value = res.data?.traceId ?? "";
+
+//         if (res.data?.token != null) {
+//           final prefs = await SharedPreferences.getInstance();
+//           await prefs.setString('preOtpToken', res.data!.token!);
+//         }
+
+//         Get.to(
+//           () => OtpScreen(
+//             traceId: traceId.value,
+//             bottomNavRoute: '/bottomNav',
+//           ),
+//           arguments: "${dialCode.value}${phone.value}",
+//         );
+//       } else {
+//         Get.snackbar("error".tr, res.message ?? "unknown_error".tr);
+//       }
+//     } finally {
+//       isLoading.value = false;
+//     }
+//   }
+
+//   Future<void> handlePostLoginNavigation() async {
+//     final doctorController = Get.put(DoctorProfileController());
+
+//     await doctorController.fetchDoctorProfile();
+
+//     if (doctorController.doctor.value == null) {
+//       Get.offAll(() => CreateProfileScreen());
+//     } else {
+//       Get.offAllNamed('/bottomNav');
+//     }
+//   }
+// }
+
+// phnechnage
 import 'package:get/get.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:beh_doctor/views/OtpScreen.dart';
 
 class LoginController extends GetxController {
   final AuthRepo repo = AuthRepo();
 
-  var phone = ''.obs;
-  var dialCode = '+880'.obs;
-  var isLoading = false.obs;
+  static LoginController get to => Get.find<LoginController>();
 
-  var traceId = ''.obs;
-  var deviceToken = ''.obs;
+  /// 🔹 LOGIN INPUT (ONLY FOR LOGIN SCREEN)
+  final RxString loginInputPhone = ''.obs;
+  final RxString loginInputDialCode = '+880'.obs;
 
-  /// 🔒 Bangladesh rule → +880 ke baad 10 digits
-  bool get isPhoneValid => phone.value.length == 10;
+  /// 🔹 LOGGED-IN USER DATA (USED EVERYWHERE ELSE)
+  final RxString currentPhone = ''.obs;
+  final RxString currentDialCode = ''.obs;
 
-  // 🔹 Request OTP
+  final RxBool isLoading = false.obs;
+  final RxString traceId = ''.obs;
+
+  bool get isPhoneValid => loginInputPhone.value.length == 10;
+
+  // =========================================================
+  // 🔹 SEND OTP (LOGIN)
+  // =========================================================
   Future<void> sendOtp() async {
     if (!isPhoneValid) {
-      Get.snackbar('error'.tr, 'enter_phone_number'.tr);
+      Get.snackbar('Error', 'Enter valid phone number');
       return;
     }
 
@@ -107,42 +184,52 @@ class LoginController extends GetxController {
       isLoading.value = true;
 
       final res = await repo.requestOtp(
-        phone: phone.value,
-        dialCode: dialCode.value,
+        phone: loginInputPhone.value,
+        dialCode: loginInputDialCode.value,
       );
 
       if (res.status == "success" && res.data != null) {
-        traceId.value = res.data?.traceId ?? "";
-
-        if (res.data?.token != null) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('preOtpToken', res.data!.token!);
-        }
+        traceId.value = res.data!.traceId!;
 
         Get.to(
           () => OtpScreen(
             traceId: traceId.value,
             bottomNavRoute: '/bottomNav',
           ),
-          arguments: "${dialCode.value}${phone.value}",
+          arguments: {
+            "phone":
+                "${loginInputDialCode.value}${loginInputPhone.value}",
+            "isForChangePhone": false,
+          },
         );
       } else {
-        Get.snackbar("error".tr, res.message ?? "unknown_error".tr);
+        Get.snackbar(
+          "Error",
+          res.message ?? "Failed to send OTP",
+        );
       }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Something went wrong. Please try again",
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> handlePostLoginNavigation() async {
-    final doctorController = Get.put(DoctorProfileController());
-
-    await doctorController.fetchDoctorProfile();
-
-    if (doctorController.doctor.value == null) {
-      Get.offAll(() => CreateProfileScreen());
-    } else {
-      Get.offAllNamed('/bottomNav');
+  // =========================================================
+  // 🔑 SET LOGGED-IN USER PHONE (AFTER PROFILE FETCH)
+  // =========================================================
+  void setLoggedInPhone({
+    required String phone,
+    required String dialCode,
+  }) {
+    try {
+      currentPhone.value = phone;
+      currentDialCode.value = dialCode;
+    } catch (_) {
+      // silent fail (safe)
     }
   }
 }

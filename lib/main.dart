@@ -59,6 +59,7 @@ import 'package:beh_doctor/TranslationLanguage.dart';
 import 'package:beh_doctor/controller/BottomNavController.dart';
 import 'package:beh_doctor/firebase_options.dart';
 import 'package:beh_doctor/modules/auth/controller/LanguageController.dart';
+import 'package:beh_doctor/modules/auth/controller/LoginController.dart';
 import 'package:beh_doctor/views/ErrorScreen.dart';
 import 'package:beh_doctor/widgets/MyStatusWidget.dart';
 import 'package:flutter/foundation.dart';
@@ -108,6 +109,7 @@ void main() async {
 
   // ------------------ PUT CONTROLLERS ------------------
   Get.put(LanguageController(), permanent: true);
+    Get.put(LoginController(), permanent: true);
 
   // Set saved language before app start
   Get.updateLocale(Locale(savedLang));
@@ -195,3 +197,146 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+// notification ka complete setup ky leye 
+// import 'dart:io';
+
+// import 'package:beh_doctor/TranslationLanguage.dart';
+// import 'package:beh_doctor/controller/BottomNavController.dart';
+// import 'package:beh_doctor/firebase_options.dart';
+// import 'package:beh_doctor/modules/auth/controller/LanguageController.dart';
+// import 'package:beh_doctor/views/ErrorScreen.dart';
+// import 'package:beh_doctor/widgets/MyStatusWidget.dart';
+// import 'package:flutter/foundation.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_easyloading/flutter_easyloading.dart';
+// import 'package:get/get.dart';
+
+// import 'package:beh_doctor/routes/AppPage.dart';
+// import 'package:beh_doctor/routes/AppRoutes.dart';
+// import 'package:beh_doctor/shareprefs.dart';
+
+// import 'package:intl/date_symbol_data_local.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
+
+// /// 🔔 BACKGROUND NOTIFICATION HANDLER (MUST BE TOP LEVEL)
+// Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   await Firebase.initializeApp(
+//     options: DefaultFirebaseOptions.currentPlatform,
+//   );
+
+//   if (kDebugMode) {
+//     print("🔔 Background Message: ${message.data}");
+//   }
+// }
+
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+
+//   await SharedPrefs.init();
+//   await initializeDateFormatting('en', null);
+
+//   /// 🔥 FIREBASE INIT
+//   try {
+//     await Firebase.initializeApp(
+//       options: DefaultFirebaseOptions.currentPlatform,
+//     );
+//   } catch (e) {
+//     if (kDebugMode) {
+//       print("Firebase initialization failed: $e");
+//     }
+//     runApp(const ErrorScreen());
+//     return;
+//   }
+
+//   /// 🔔 REGISTER BACKGROUND HANDLER
+//   FirebaseMessaging.onBackgroundMessage(
+//     firebaseMessagingBackgroundHandler,
+//   );
+
+//   /// 🔔 REQUEST NOTIFICATION PERMISSION
+//   await FirebaseMessaging.instance.requestPermission(
+//     alert: true,
+//     badge: true,
+//     sound: true,
+//     provisional: false,
+//   );
+
+//   /// 🔔 GET FCM TOKEN
+//   String? token = await FirebaseMessaging.instance.getToken();
+//   if (kDebugMode) {
+//     print("🎯 FCM TOKEN: $token");
+//   }
+
+//   /// 🔔 FOREGROUND NOTIFICATION LISTENER
+//   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+//     if (kDebugMode) {
+//       print("🔔 Foreground Message: ${message.notification?.title}");
+//       print("📦 Data: ${message.data}");
+//     }
+//   });
+
+//   /// 🔔 NOTIFICATION TAP HANDLER
+//   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+//     if (kDebugMode) {
+//       print("👉 Notification Clicked: ${message.data}");
+//     }
+
+//     /// yahan future me navigation laga sakte ho
+//     /// example:
+//     /// if (message.data["type"] == "appointment") {
+//     ///   Get.toNamed(Routes.APPOINTMENT_DETAILS);
+//     /// }
+//   });
+
+//   /// ------------------ LOAD SAVED LANGUAGE ------------------
+//   String savedLang = SharedPrefs.getLanguage() ?? "en";
+
+//   /// ------------------ PUT CONTROLLERS ------------------
+//   Get.put(LanguageController(), permanent: true);
+//   Get.updateLocale(Locale(savedLang));
+
+//   /// ------------------ EASY LOADING ------------------
+//   EasyLoading.instance
+//     ..indicatorType = EasyLoadingIndicatorType.threeBounce
+//     ..loadingStyle = EasyLoadingStyle.custom
+//     ..indicatorSize = 30.0
+//     ..backgroundColor = AppColors.color008541
+//     ..indicatorColor = Colors.white
+//     ..textColor = Colors.white
+//     ..radius = 10.0
+//     ..userInteractions = false
+//     ..dismissOnTap = false;
+
+//   runApp(MyApp());
+// }
+
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     final langController = Get.find<LanguageController>();
+
+//     return GetMaterialApp(
+//       debugShowCheckedModeBanner: false,
+
+//       initialBinding: BindingsBuilder(() {
+//         Get.put(BottomNavController(), permanent: true);
+//       }),
+
+//       translations: AppTranslations(),
+//       locale: Locale(langController.selectedLang.value),
+//       fallbackLocale: const Locale('en'),
+
+//       initialRoute: Routes.SPLASH,
+//       getPages: AppPages.pages,
+
+//       builder: (context, child) {
+//         return MediaQuery(
+//           data: MediaQuery.of(context)
+//               .copyWith(textScaler: const TextScaler.linear(1.0)),
+//           child: EasyLoading.init()(context, child),
+//         );
+//       },
+//     );
+//   }
+// }
