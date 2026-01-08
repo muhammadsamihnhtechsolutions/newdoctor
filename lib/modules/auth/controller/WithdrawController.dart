@@ -1,7 +1,10 @@
 
+import 'package:get/get.dart';
+
+import 'package:beh_doctor/models/BankListResponse.dart';
+import 'package:beh_doctor/models/DistrictResponseModel.dart';
 import 'package:beh_doctor/models/WithdrawAccountListResponse.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
-import 'package:get/get.dart';
 
 class WithdrawAccountController extends GetxController {
   final WithdrawAccountRepo repo = WithdrawAccountRepo();
@@ -14,16 +17,38 @@ class WithdrawAccountController extends GetxController {
   RxList<WithdrawAccount> bankAccounts = <WithdrawAccount>[].obs;
   RxList<WithdrawAccount> mfsAccounts = <WithdrawAccount>[].obs;
 
+  /// 🔥 LOCAL CACHE (for mapping)
+  List<BankModel> bankList = [];
+  List<BankModel> mfsList = [];
+  List<District> districtList = [];
+
   @override
   void onInit() {
     super.onInit();
-    fetchAccounts();
+    fetchReferenceData();
   }
 
-  // ---------------- TAB CHANGE ----------------
-  void changeTab(int index) {
-    selectedTab.value = index;
-    print("🔄 Tab Changed to: ${index == 0 ? "BANK" : "MFS"}");
+  // ---------------- LOAD BANK + MFS + DISTRICT ----------------
+  Future<void> fetchReferenceData() async {
+    try {
+      final bankRes = await repo.getBankAndMfsListResponse({"type": "bank"});
+      final allRes = await repo.getBankAndMfsListResponse({});
+      final distRes = await repo.districtListResponse();
+
+      if (bankRes.bankList != null) {
+        bankList = bankRes.bankList!;
+      }
+
+      if (allRes.bankList != null) {
+        mfsList = allRes.bankList!.where((e) => e.type == "mfs").toList();
+      }
+
+      if (distRes.districtList != null) {
+        districtList = distRes.districtList!;
+      }
+    } catch (_) {}
+
+    fetchAccounts();
   }
 
   // ---------------- FETCH ACCOUNT LIST ----------------
@@ -32,20 +57,44 @@ class WithdrawAccountController extends GetxController {
 
     final response = await repo.getWithdrawAccountList();
 
-    print("📌 STATUS: ${response.status}");
-    print("📌 MESSAGE: ${response.message}");
-
     if (response.withdrawAccountdata != null) {
-      List<WithdrawAccount> all =
-          response.withdrawAccountdata!.withdrawAccountList;
+      final all = response.withdrawAccountdata!.withdrawAccountList;
 
       bankAccounts.assignAll(all.where((e) => e.accountType == "bank"));
       mfsAccounts.assignAll(all.where((e) => e.accountType == "mfs"));
 
-      print("🏦 TOTAL BANK ACCOUNTS: ${bankAccounts.length}");
-      print("📲 TOTAL MFS ACCOUNTS: ${mfsAccounts.length}");
+      // -------- BANK ACCOUNTS --------
+      for (var acc in bankAccounts) {
+        final bank = bankList.firstWhereOrNull(
+          (b) => b.id == acc.bankName,
+        );
+        if (bank != null) {
+          acc.bankName = bank.title ?? acc.bankName;
+        }
+
+        final district = districtList.firstWhereOrNull(
+          (d) => d.id == acc.district,
+        );
+        if (district != null) {
+          acc.district = district.name ?? acc.district;
+        }
+      }
+
+      // -------- MFS ACCOUNTS --------
+      for (var acc in mfsAccounts) {
+        final mfs = mfsList.firstWhereOrNull(
+          (m) => m.id == acc.bankName,
+        );
+        if (mfs != null) {
+          acc.bankName = mfs.title ?? acc.bankName;
+        }
+      }
     }
 
     isLoading.value = false;
+  }
+
+  void changeTab(int index) {
+    selectedTab.value = index;
   }
 }

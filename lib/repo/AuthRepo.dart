@@ -668,6 +668,22 @@ class WithdrawAccountRepo {
       );
     }
   }
+  
+  Future<CommonResponseModel> addNewBankAccount(
+      Map<String, dynamic> parameters) async {
+    try {
+      final apiResponse = CommonResponseModel.fromJson(
+        await _apiService.getPostResponse(
+            ApiConstants.doctorPaymentAccount, parameters) as Map<String, dynamic>,
+      );
+      return apiResponse;
+    } catch (err) {
+      return CommonResponseModel(
+        status: 'error',
+        message: 'An error occurred',
+      );
+    }
+  }
 
 
   Future<DistrictResponseModel> districtListResponse() async {

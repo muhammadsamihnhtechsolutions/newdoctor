@@ -90,6 +90,7 @@
 
 import 'package:beh_doctor/models/BankListResponse.dart';
 import 'package:beh_doctor/models/DistrictResponseModel.dart';
+import 'package:beh_doctor/modules/auth/controller/WithdrawController.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -148,29 +149,36 @@ class AddBankController extends GetxController {
     isLoading.value = true;
 
     final params = {
-      "accountType": "bank",
-      "bankName": selectedBank.value!.title,
-      "branch": branchController.text.trim(),
-      "district": selectedDistrict.value!.name,
-      "accountName": accountNameController.text.trim(),
-      "accountNumber": accountNumberController.text.trim(),
-    };
+  "accountType": "bank",
 
-    // final response = await _repo.addNewBankAccount(params);
+  // ✅ yahan ID bhejo
+  "bankName": selectedBank.value!.id,
 
-    // isLoading.value = false;
+  "branch": branchController.text.trim(),
 
-    // if (response.status == "success") {
-    //   /// 🔥 IMPORTANT PART
-    //   /// withdraw controller se fresh list lao
-    //   final withdrawController = Get.find<WithdrawAccountController>();
-    //   await withdrawController.fetchAccounts();
+  // ✅ yahan bhi ID
+  "district": selectedDistrict.value!.id,
 
-    //   Get.back();
-    //   Get.snackbar("Success", "Bank account added successfully");
-    // } else {
-    //   Get.snackbar("Error", response.message ?? "Failed to add account");
-    // }
+  "accountName": accountNameController.text.trim(),
+  "accountNumber": accountNumberController.text.trim(),
+};
+
+
+    final response = await _repo.addNewBankAccount(params);
+
+    isLoading.value = false;
+
+    if (response.status == "success") {
+      /// 🔥 IMPORTANT PART
+      /// withdraw controller se fresh list lao
+      final withdrawController = Get.find<WithdrawAccountController>();
+      await withdrawController.fetchAccounts();
+
+      Get.back();
+      Get.snackbar("Success", "Bank account added successfully");
+    } else {
+      Get.snackbar("Error", response.message ?? "Failed to add account");
+    }
   }
 }
 

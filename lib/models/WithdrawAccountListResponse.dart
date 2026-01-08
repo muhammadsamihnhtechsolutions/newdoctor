@@ -98,6 +98,8 @@ class WithdrawAccount {
   String createdAt;
   String updatedAt;
   int v;
+    String? displayBankName;
+  String? displayDistrict;
 
   WithdrawAccount({
     required this.id,
@@ -112,6 +114,8 @@ class WithdrawAccount {
     required this.createdAt,
     required this.updatedAt,
     required this.v, required String mfsName,
+        this.displayBankName,
+    this.displayDistrict,
   });
 
   factory WithdrawAccount.fromJson(Map<String, dynamic> json) => WithdrawAccount(
