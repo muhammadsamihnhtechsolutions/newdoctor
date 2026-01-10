@@ -1,49 +1,4 @@
-// controller/appointment_details_controller.dart
-// import 'package:beh_doctor/models/AppoinmentDetailModel.dart';
-// import 'package:beh_doctor/repo/AuthRepo.dart';
-// import 'package:beh_doctor/views/AgoraDoctorCallScreen.dart';
-// import 'package:flutter/foundation.dart';
-// import 'package:get/get.dart';
 
-
-// class AppointmentDetailsController extends GetxController {
-//   final AppointmentRepo repo;
-
-//   AppointmentDetailsController(Set<Object> set, {required this.repo});
-
-//   var isLoading = false.obs;
-//   var appointmentDetails = Rxn<AppointmentDetailsResponseModel>();
-
-//   /// Fetch appointment details by ID
-//   Future<void> fetchAppointmentDetails(String appointmentId) async {
-//     try {
-      
-//       isLoading.value = true;
-//       final data = await repo.getDoctorAppointmentDetails(appointmentId);
-  
-
-//       // 🔹 Print the full response in terminal for debugging
-//       print("✅ Fetched Appointment Details: ${data.toJson()}");
-      
-
-//       appointmentDetails.value = data;
-//     } catch (e) {
-//       print("❌ Error fetching appointment details: $e");
-//       appointmentDetails.value = AppointmentDetailsResponseModel(
-//         status: 'error',
-//         message: 'An error occurred',
-//         appointmentDetailsData: null,
-        
-//       );
-//     } finally {
-//       isLoading.value = false;
-//     }
-//   }
- 
-
-// }
-
-// 
 import 'package:beh_doctor/models/AppoinmentDetailModel.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
 import 'package:get/get.dart';

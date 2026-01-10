@@ -78,7 +78,7 @@ static const String walletStatistics = '$baseUrl/api/doctor/wallet/statistics';
    static const String medicineName = '$baseUrl/api/doctor/medication';
    static const String investigationList =
     '$baseUrl/api/doctor/investigation';
-
+  static const String notificationList = '$baseUrl/api/doctor/notification';
 
 
 }

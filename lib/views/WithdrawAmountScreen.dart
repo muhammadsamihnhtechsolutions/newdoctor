@@ -1,6 +1,10 @@
+
+
+
 // import 'package:beh_doctor/models/WithdrawAccountListResponse.dart';
 // import 'package:beh_doctor/modules/auth/controller/TransectionController.dart';
 // import 'package:beh_doctor/repo/AuthRepo.dart';
+// import 'package:beh_doctor/views/WithdrawSuccesScreen.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 
@@ -180,7 +184,7 @@
 //       await transactionController.fetchWalletStatistics();
 //       await transactionController.fetchTransactions();
 
-//       // Get.offAllNamed('/HOME');
+//   Get.to(() => const WithdrawSuccessScreen());
 //     } else {
 //       Get.snackbar("Error", response.message ?? "Withdraw failed");
 //     }
@@ -188,12 +192,13 @@
 // }
 
 
-
 import 'package:beh_doctor/models/WithdrawAccountListResponse.dart';
 import 'package:beh_doctor/modules/auth/controller/TransectionController.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
+import 'package:beh_doctor/views/WithdrawSuccesScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class WithdrawAmountScreen extends StatelessWidget {
   final WithdrawAccount account = Get.arguments;
@@ -205,6 +210,45 @@ class WithdrawAmountScreen extends StatelessWidget {
   final RxBool isLoading = false.obs;
 
   final Color appGreen = const Color(0xFF008541);
+
+  /// 🔔 LOCAL NOTIFICATION INSTANCE
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  WithdrawAmountScreen({super.key}) {
+    _initNotifications();
+  }
+
+  void _initNotifications() {
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const ios = DarwinInitializationSettings();
+
+    const settings = InitializationSettings(
+      android: android,
+      iOS: ios,
+    );
+
+    _notificationsPlugin.initialize(settings);
+  }
+
+  Future<void> _showWithdrawSuccessNotification() async {
+    const androidDetails = AndroidNotificationDetails(
+      'withdraw_channel',
+      'Withdraw Notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const notificationDetails =
+        NotificationDetails(android: androidDetails);
+
+    await _notificationsPlugin.show(
+      0,
+      'Withdraw Successful',
+      'Your withdraw request has been submitted successfully.',
+      notificationDetails,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -274,14 +318,21 @@ class WithdrawAmountScreen extends StatelessWidget {
 
             const SizedBox(height: 8),
 
+            /// 🟢 AMOUNT FIELD (GREEN BORDER + CURSOR)
             TextField(
               controller: amountController,
               keyboardType: TextInputType.number,
+              cursorColor: appGreen,
               decoration: InputDecoration(
                 hintText: "Enter amount",
                 suffixText: "Max",
-                border: OutlineInputBorder(
+                enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: appGreen),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: appGreen, width: 2),
                 ),
               ),
             ),
@@ -292,35 +343,35 @@ class WithdrawAmountScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: 50,
-              child: Obx(() => ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: appGreen,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+              child: Obx(
+                () => ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: appGreen,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    onPressed:
-                        isLoading.value ? null : submitWithdraw,
-                    child: isLoading.value
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            "Withdraw",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  ),
+                  onPressed: isLoading.value ? null : submitWithdraw,
+                  child: isLoading.value
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
-                  )),
+                        )
+                      : const Text(
+                          "Withdraw",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
             ),
           ],
         ),
@@ -354,7 +405,7 @@ class WithdrawAmountScreen extends StatelessWidget {
       return;
     }
 
-    /// ✅ LOADING START
+    /// ⏳ LOADING START (same screen)
     isLoading.value = true;
 
     final response = await withdrawRepo.getDoctorWalletSubmitWithdraw({
@@ -362,20 +413,17 @@ class WithdrawAmountScreen extends StatelessWidget {
       "amount": amount,
     });
 
-    /// ✅ LOADING STOP
     isLoading.value = false;
 
     if (response.status == "success") {
-      Get.snackbar("Success", response.message ?? "Withdraw request sent");
-
       await transactionController.fetchWalletStatistics();
       await transactionController.fetchTransactions();
 
-      // Get.offAllNamed('/HOME');
-    } else {
-      Get.snackbar("Error", response.message ?? "Withdraw failed");
+      /// 🔔 LOCAL NOTIFICATION (FG + BG)
+      await _showWithdrawSuccessNotification();
+
+      /// ➡️ SUCCESS SCREEN
+      Get.to(() => const WithdrawSuccessScreen());
     }
   }
 }
-
-

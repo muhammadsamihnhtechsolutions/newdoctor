@@ -81,7 +81,7 @@ class HomeAppBarGetX extends StatelessWidget implements PreferredSizeWidget {
 
           // ---------------- NOTIFICATION ICON ----------------
           GestureDetector(
-            // onTap: () => Get.toNamed('PrescriptionFlowScreen'),
+            onTap: () => Get.toNamed('notifications'),
             child: const Icon(
               Icons.notifications_none,
               size: 26,

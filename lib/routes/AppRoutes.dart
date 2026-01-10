@@ -4,7 +4,7 @@ abstract class Routes {
   static const SPLASH = '/splash';
   static const LOGIN = '/login';
   static const OTP = '/otp';
-  static const HOME = '/HomePage';
+  // static const HOME = '/HomePage';
   static const BOTTOM_NAV = "/bottomNav";
   static const DoctorProfileScreen = "/doctorProfileScreen";
   static const EditProfileScreen = "/editProfileScreen";

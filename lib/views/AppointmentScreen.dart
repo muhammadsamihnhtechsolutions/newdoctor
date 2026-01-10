@@ -1,3 +1,4 @@
+import 'package:beh_doctor/controller/BottomNavController.dart';
 import 'package:beh_doctor/modules/AppointmentController.dart';
 import 'package:beh_doctor/widgets/AppointmentListWidget.dart';
 import 'package:flutter/material.dart';
@@ -18,16 +19,36 @@ class AppointmentTabScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
 
-      appBar: AppBar(
-        centerTitle: false,
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        title: Text(
-          "Queue".tr,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-      ),
+      // appBar: AppBar(
+      //   centerTitle: false,
+      //   automaticallyImplyLeading: false,
+      //   elevation: 0,
+      //   backgroundColor: Colors.white,
+      //   title: Text(
+      //     "Queue".tr,
+      //     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+      //   ),
+      // ),
+   appBar: AppBar(
+  backgroundColor: Colors.white,
+  elevation: 0,
+  automaticallyImplyLeading: false,
+  leading: IconButton(
+    icon: const Icon(Icons.arrow_back, color: Colors.black),
+    onPressed: () {
+      if (Get.key.currentState?.canPop() == true) {
+        Get.back();
+      } else {
+        Get.find<BottomNavController>().changeTab(0);
+      }
+    },
+  ),
+  title: Text(
+    "Queue".tr,
+    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+  ),
+),
+
 
       body: Column(
         children: [

@@ -37,12 +37,12 @@ class AppTestWidget extends StatelessWidget {
               _appTestCard(
                 title: "visual_acuity".tr,
                 leftItems: [
-                  "OD   ${data.visualAcuity?.left?.od ?? '--'}",
+                  // "OD   ${data.visualAcuity?.left?.od ?? '--'}",
                   "OS   ${data.visualAcuity?.left?.os ?? '--'}",
                 ],
                 rightItems: [
                   "OD   ${data.visualAcuity?.right?.od ?? '--'}",
-                  "OS   ${data.visualAcuity?.right?.os ?? '--'}",
+                  // "OS   ${data.visualAcuity?.right?.os ?? '--'}",
                 ],
               ),
 
@@ -54,12 +54,12 @@ class AppTestWidget extends StatelessWidget {
               _appTestCard(
                 title: "near_vision".tr,
                 leftItems: [
-                  "OD   ${data.nearVision?.left?.od ?? '--'}",
+                  // "OD   ${data.nearVision?.left?.od ?? '--'}",
                   "OS   ${data.nearVision?.left?.os ?? '--'}",
                 ],
                 rightItems: [
                   "OD   ${data.nearVision?.right?.od ?? '--'}",
-                  "OS   ${data.nearVision?.right?.os ?? '--'}",
+                  // "OS   ${data.nearVision?.right?.os ?? '--'}",
                 ],
               ),
 

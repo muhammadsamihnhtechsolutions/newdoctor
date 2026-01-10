@@ -5,7 +5,7 @@ import 'package:beh_doctor/routes/AppRoutes.dart';
 import 'package:beh_doctor/views/AddMfsScreen.dart';
 
 import 'package:beh_doctor/views/AgoraDoctorCallScreen.dart';
-import 'package:beh_doctor/views/BottomNavScreen.dart';
+
 import 'package:beh_doctor/views/DoctorProfileScreen.dart';
 import 'package:beh_doctor/views/EditProfileScreen.dart';
 import 'package:beh_doctor/views/HomePage.dart';
@@ -110,10 +110,10 @@ GetPage(
     GetPage(name: Routes.PrivacyPolicy, page: () => PrivacyPolicyPage()),
 
     // / Home Screen (Not BottomNav)
-    GetPage(
-      name: Routes.HOME,
-      page: () => HomePage(),
-    ),
+    // GetPage(
+    //   name: Routes.HOME,
+    //   page: () => HomePage(),
+    // ),
 
     /// Bottom Navigation Page with Binding
     // GetPage(

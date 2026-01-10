@@ -10,6 +10,7 @@ import 'package:beh_doctor/models/DistrictResponseModel.dart';
 import 'package:beh_doctor/models/DoctorProfileModel.dart';
 import 'package:beh_doctor/models/InvestigationModel.dart';
 import 'package:beh_doctor/models/MedicineTrackerModel.dart';
+import 'package:beh_doctor/models/NotificationResponseModel.dart';
 
 import 'package:beh_doctor/models/TransectionModel.dart';
 import 'package:beh_doctor/models/UploadProfileImage.dart';
@@ -149,7 +150,26 @@ Future<String?> requestChangePhoneOtp({
       );
     } catch (_) {}
   }
+  
+
+  Future<NotificationResponseModel> getNotificationList(
+      Map<String, String> parameters) async {
+    try {
+      final apiResponse = NotificationResponseModel.fromJson(
+        await _apiService.getGetResponse(ApiConstants.notificationList)
+            as Map<String, dynamic>,
+      );
+      return apiResponse;
+    } catch (err) {
+      return NotificationResponseModel(
+        status: 'error',
+        message: 'An error occurred',
+      );
+    }
+  }
+
 }
+
 
 
 class DoctorProfileRepo {
@@ -786,4 +806,3 @@ class ExperienceRepo {
     }
   }
 }
-
