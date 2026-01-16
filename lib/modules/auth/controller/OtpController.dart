@@ -1,6 +1,5 @@
-
-
 import 'dart:async';
+import 'dart:io';
 import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
 import 'package:beh_doctor/repo/FcmHelper.dart';
@@ -12,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpController extends GetxController {
   final AuthRepo repo = AuthRepo();
-  
 
   var otpCode = ''.obs;
   var isOtpLoading = false.obs;
@@ -27,7 +25,6 @@ class OtpController extends GetxController {
   /// false = LOGIN OTP
   /// true  = CHANGE PHONE OTP
   bool isForChangePhone = false;
-  
 
   OtpController({this.isForChangePhone = false});
 
@@ -51,20 +48,24 @@ class OtpController extends GetxController {
 
     try {
       isOtpLoading.value = true;
-final deviceToken = await FcmHelper.ensureToken();
 
-if (deviceToken == null || deviceToken.isEmpty) {
-  Get.snackbar(
-    'error'.tr,
-    'Device token not ready. Please wait & try again.',
-  );
-  return;
-}
+      final String? deviceToken;
 
-print("📲 DEVICE TOKEN => $deviceToken");
+      if (Platform.isAndroid) {
+        deviceToken = await FcmHelper.ensureToken();
+      } else {
+        deviceToken = 'dfefdsfcdsfcsd';
+      }
 
+      if (deviceToken == null || deviceToken.isEmpty) {
+        Get.snackbar(
+          'error'.tr,
+          'Device token not ready. Please wait & try again.',
+        );
+        return;
+      }
 
-
+      print("📲 DEVICE TOKEN => $deviceToken");
 
       final result = isForChangePhone
           ? await repo.verifyChangePhoneOtp(
@@ -104,8 +105,7 @@ print("📲 DEVICE TOKEN => $deviceToken");
       // 🔹 LOGIN SUCCESS (UNCHANGED)
       // =================================================
       if (result.data?.token != null) {
-    await SharedPrefs.saveToken(result.data!.token!);
-
+        await SharedPrefs.saveToken(result.data!.token!);
 
         final doctorController = Get.put(
           DoctorProfileController(),
