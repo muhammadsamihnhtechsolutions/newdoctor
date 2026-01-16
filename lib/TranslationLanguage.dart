@@ -233,6 +233,17 @@ class AppTranslations extends Translations {
 'cancel': 'Cancel',
 'delete': 'Delete',
 
+
+
+
+  'name_required': 'Name is required',
+  'about_required': 'About field is required',
+  'experience_required': 'Experience is required',
+  'gender_required': 'Please select gender',
+  'specialty_required': 'Please select specialty',
+  'hospital_required': 'Please select hospital',
+  'profile_create_failed': 'Profile creation failed',
+
     },
 
     'bn': {
@@ -240,6 +251,14 @@ class AppTranslations extends Translations {
       'no_data': 'কোনো তথ্য নেই',
       'unknown': 'অজানা',
 
+
+  'name_required': 'নাম দেওয়া আবশ্যক',
+  'about_required': 'About ফিল্ড পূরণ করুন',
+  'experience_required': 'অভিজ্ঞতা দেওয়া আবশ্যক',
+  'gender_required': 'লিঙ্গ নির্বাচন করুন',
+  'specialty_required': 'বিশেষজ্ঞতা নির্বাচন করুন',
+  'hospital_required': 'হাসপাতাল নির্বাচন করুন',
+  'profile_create_failed': 'প্রোফাইল তৈরি ব্যর্থ হয়েছে',
       // Basic Info
       'basic_info': 'মৌলিক তথ্য',
       'gender': 'লিঙ্গ',

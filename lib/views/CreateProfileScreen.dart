@@ -279,14 +279,33 @@ Future<void> _pickImage(ImageSource source) async {
 
   /// ================= CREATE PROFILE =================
 Future<void> _createProfile() async {
-  if (selectedGender == null) {
-    Get.snackbar("Error", "Please select gender");
+  if (nameCtrl.text.trim().isEmpty) {
+    Get.snackbar("error".tr, "name_required".tr);
     return;
   }
 
-  if (controller.selectedSpecialtyIds.isEmpty ||
-      controller.selectedHospitalIds.isEmpty) {
-    Get.snackbar("Error", "Please select all fields");
+  if (aboutCtrl.text.trim().isEmpty) {
+    Get.snackbar("error".tr, "about_required".tr);
+    return;
+  }
+
+  if (expCtrl.text.trim().isEmpty) {
+    Get.snackbar("error".tr, "experience_required".tr);
+    return;
+  }
+
+  if (selectedGender == null) {
+    Get.snackbar("error".tr, "gender_required".tr);
+    return;
+  }
+
+  if (controller.selectedSpecialtyIds.isEmpty) {
+    Get.snackbar("error".tr, "specialty_required".tr);
+    return;
+  }
+
+  if (controller.selectedHospitalIds.isEmpty) {
+    Get.snackbar("error".tr, "hospital_required".tr);
     return;
   }
 
@@ -294,7 +313,7 @@ Future<void> _createProfile() async {
     "name": nameCtrl.text.trim(),
     "about": aboutCtrl.text.trim(),
     "experienceInYear": expCtrl.text.trim(),
-    "bmdcCode": bmdcCtrl.text.trim(),
+    "bmdcCode": bmdcCtrl.text.trim(), // optional
     "gender": selectedGender,
     "specialty": controller.selectedSpecialtyIds.first,
     "hospital": controller.selectedHospitalIds.first,
@@ -304,12 +323,44 @@ Future<void> _createProfile() async {
     await controller.createDoctorProfile(params);
     await controller.fetchDoctorProfile();
 
-    /// ✅ FORCE NAVIGATION (NO FAIL)
     Get.offAll(() => BottomNavScreen());
   } catch (e) {
-    Get.snackbar("Error", "Profile create failed");
+    Get.snackbar("error".tr, "profile_create_failed".tr);
   }
 }
+
+// Future<void> _createProfile() async {
+//   if (selectedGender == null) {
+//     Get.snackbar("Error", "Please select gender");
+//     return;
+//   }
+
+//   if (controller.selectedSpecialtyIds.isEmpty ||
+//       controller.selectedHospitalIds.isEmpty) {
+//     Get.snackbar("Error", "Please select all fields");
+//     return;
+//   }
+
+//   final params = {
+//     "name": nameCtrl.text.trim(),
+//     "about": aboutCtrl.text.trim(),
+//     "experienceInYear": expCtrl.text.trim(),
+//     "bmdcCode": bmdcCtrl.text.trim(),
+//     "gender": selectedGender,
+//     "specialty": controller.selectedSpecialtyIds.first,
+//     "hospital": controller.selectedHospitalIds.first,
+//   };
+
+//   try {
+//     await controller.createDoctorProfile(params);
+//     await controller.fetchDoctorProfile();
+
+//     /// ✅ FORCE NAVIGATION (NO FAIL)
+//     Get.offAll(() => BottomNavScreen());
+//   } catch (e) {
+//     Get.snackbar("Error", "Profile create failed");
+//   }
+// }
 
 
   /// ================= FIELD =================
