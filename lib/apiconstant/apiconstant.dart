@@ -12,7 +12,8 @@ class ApiConstants {
   static const String resendOtp = '$baseUrl/api/common/resendOtp';
   static const String changePhoneRequest = '$baseUrl/api/doctor/changePhone/request';
   static const String changePhoneVerify = '$baseUrl/api/doctor/changePhone/verify';
-
+  static const String deletePaymentAccount =
+      '$baseUrl/api/doctor/paymentAccount';
   /// 
   ///  DOCTOR APIs
   /// 
@@ -79,6 +80,13 @@ static const String walletStatistics = '$baseUrl/api/doctor/wallet/statistics';
    static const String investigationList =
     '$baseUrl/api/doctor/investigation';
   static const String notificationList = '$baseUrl/api/doctor/notification';
+    static const String chiefComplaintList =
+      '$baseUrl/api/doctor/chief-complaints';
+      static const String diagnosisList =
+    '$baseUrl/api/doctor/diagnosis';
+static const String surgeryList =
+    '$baseUrl/api/doctor/surgery';
+
 
 
 }

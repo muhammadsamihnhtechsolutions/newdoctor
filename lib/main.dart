@@ -1,156 +1,11 @@
 
-// import 'dart:io';
 
 // import 'package:beh_doctor/TranslationLanguage.dart';
 // import 'package:beh_doctor/controller/BottomNavController.dart';
 // import 'package:beh_doctor/firebase_options.dart';
 // import 'package:beh_doctor/modules/auth/controller/LanguageController.dart';
-// import 'package:beh_doctor/modules/auth/controller/LoginController.dart';
-// import 'package:beh_doctor/views/ErrorScreen.dart';
+// import 'package:beh_doctor/views/LocalNotificationService.dart';
 // import 'package:beh_doctor/widgets/MyStatusWidget.dart';
-// import 'package:flutter/foundation.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_easyloading/flutter_easyloading.dart';
-// import 'package:get/get.dart';
-
-// import 'package:beh_doctor/routes/AppPage.dart';
-// import 'package:beh_doctor/routes/AppRoutes.dart';
-// import 'package:beh_doctor/shareprefs.dart';
-
-// 👇 ADD THIS
-// import 'package:intl/date_symbol_data_local.dart';
-// import 'package:firebase_core/firebase_core.dart'; // <-- ADDED
-// import 'package:firebase_messaging/firebase_messaging.dart';
-
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-
-//   await SharedPrefs.init();
-
-//   //  ADD THIS (REQUIRED FOR DateFormat)
-//   await initializeDateFormatting('en', null);
-
-//   // 👇 ADD THIS (FIREBASE INIT)
-
-//   // await Firebase.initializeApp();
-//   try {
-//     await Firebase.initializeApp(
-//       options: DefaultFirebaseOptions.currentPlatform,
-//     );
-//   } catch (e) {
-//     if (kDebugMode) {
-//       print("Firebase initialization failed: $e");
-//     }
-
-//     runApp(const ErrorScreen());
-//     return;
-//   }
-
-//   // 👇 ADD THIS (GET FCM TOKEN)
-//   // String? token = await FirebaseMessaging.instance.getToken();
-//   // print("FCM TOKEN: $token");
-
-//   // ------------------ LOAD SAVED LANGUAGE ------------------
-//   String savedLang = SharedPrefs.getLanguage() ?? "en";
-
-//   // ------------------ PUT CONTROLLERS ------------------
-//   Get.put(LanguageController(), permanent: true);
-//     Get.put(LoginController(), permanent: true);
-
-//   // Set saved language before app start
-//   Get.updateLocale(Locale(savedLang));
-
-//   // Set up loading indicator customization
-//   EasyLoading.instance
-//     ..indicatorType = EasyLoadingIndicatorType.threeBounce
-//     ..loadingStyle = EasyLoadingStyle.custom
-//     ..indicatorSize = 30.0
-//     // ..backgroundColor = AppConstant.primarySwatch.withValues(alpha: 0.5)
-//     ..backgroundColor = AppColors.color008541
-//     ..indicatorColor = Colors.white
-//     ..textColor = Colors.white
-//     ..radius = 10.0
-//     ..userInteractions = false
-//     ..dismissOnTap = false;
-
-//   runApp(MyApp());
-// }
-
-// Future<String> getDeviceToken() async {
-//   // Request permissions
-//   await FirebaseMessaging.instance.requestPermission(
-//     alert: true,
-//     badge: true,
-//     sound: true,
-//     announcement: true,
-//     carPlay: true,
-//     criticalAlert: true,
-//     provisional: true,
-//   );
-
-//   // iOS specific check
-//   if (Platform.isIOS) {
-//     String? apns = await FirebaseMessaging.instance.getAPNSToken();
-//     if (kDebugMode) {
-//       print("🔑 APNs Token: $apns");
-//     }
-
-//     if (apns == null) {
-//       print("❌ APNs token not yet set, returning empty.");
-//       return '';
-//     }
-//   }
-
-//   // Fetch FCM token
-//   String? token = await FirebaseMessaging.instance.getToken();
-//   print("🎯 FCM Token: $token");
-
-//   return token ?? 'dummy';
-// }
-
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     final langController = Get.find<LanguageController>();
-//     final GlobalKey mediaQueryKey = GlobalKey();
-
-//     return GetMaterialApp(
-//       debugShowCheckedModeBanner: false,
-
-//       // 👇 ADD THIS LINE
-//       initialBinding: BindingsBuilder(() {
-//         Get.put(BottomNavController(), permanent: true);
-//         // Get.put(SplashController(), permanent: true);
-//       }),
-
-//       // ----------------- Localization Setup -----------------
-//       translations: AppTranslations(),
-//       locale: Locale(langController.selectedLang.value),
-//       fallbackLocale: const Locale('en'),
-
-//       // ----------------- Routing -----------------
-//       initialRoute: Routes.SPLASH,
-//       getPages: AppPages.pages,
-//       builder: (context, child) {
-//         return MediaQuery(
-//           key: mediaQueryKey,
-//           data: MediaQuery.of(
-//             context,
-//           ).copyWith(textScaler: const TextScaler.linear(1.0)),
-//           child: EasyLoading.init()(context, child),
-//         );
-//       },
-//     );
-//   }
-// }
-// notification ka complete setup ky leye 
-// import 'package:beh_doctor/TranslationLanguage.dart';
-// import 'package:beh_doctor/controller/BottomNavController.dart';
-// import 'package:beh_doctor/firebase_options.dart';
-// import 'package:beh_doctor/modules/auth/controller/LanguageController.dart';
-// import 'package:beh_doctor/views/ErrorScreen.dart';
-// import 'package:beh_doctor/widgets/MyStatusWidget.dart';
-// import 'package:flutter/foundation.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_easyloading/flutter_easyloading.dart';
 // import 'package:get/get.dart';
@@ -162,16 +17,17 @@
 // import 'package:intl/date_symbol_data_local.dart';
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
-// /// 🔔 BACKGROUND NOTIFICATION HANDLER (MUST BE TOP LEVEL)
+
+// /// 🔔 BACKGROUND HANDLER
 // Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 //   await Firebase.initializeApp(
 //     options: DefaultFirebaseOptions.currentPlatform,
 //   );
 
-//   if (kDebugMode) {
-//     print("🔔 Background Message: ${message.data}");
-//   }
+//   print("🔔 Background message received");
+//   print("📦 Data: ${message.data}");
 // }
 
 // void main() async {
@@ -181,64 +37,67 @@
 //   await initializeDateFormatting('en', null);
 
 //   /// 🔥 FIREBASE INIT
-//   try {
-//     await Firebase.initializeApp(
-//       options: DefaultFirebaseOptions.currentPlatform,
-//     );
-//   } catch (e) {
-//     if (kDebugMode) {
-//       print("Firebase initialization failed: $e");
-//     }
-//     runApp(const ErrorScreen());
-//     return;
-//   }
+//   await Firebase.initializeApp(
+//     options: DefaultFirebaseOptions.currentPlatform,
+//   );
 
-//   /// 🔔 REGISTER BACKGROUND HANDLER
+//   /// 🔔 LOCAL NOTIFICATION INIT (IMPORTANT)
+//   await LocalNotificationService.init();
+
+//   /// 🔔 BACKGROUND REGISTER
 //   FirebaseMessaging.onBackgroundMessage(
 //     firebaseMessagingBackgroundHandler,
 //   );
 
-//   /// 🔔 REQUEST NOTIFICATION PERMISSION
+//   /// 🔔 PERMISSION
 //   await FirebaseMessaging.instance.requestPermission(
 //     alert: true,
 //     badge: true,
 //     sound: true,
-//     provisional: false,
 //   );
 
-//   /// 🔔 GET FCM TOKEN
-//   String? token = await FirebaseMessaging.instance.getToken();
-//   if (kDebugMode) {
-//     print("🎯 FCM TOKEN: $token");
-//   }
+// final fcmToken = await FirebaseMessaging.instance.getToken();
 
-//   /// 🔔 FOREGROUND NOTIFICATION LISTENER
+// if (fcmToken != null && fcmToken.isNotEmpty) {
+//   await SharedPrefs.saveFcmToken(fcmToken);
+//   print("🔥 SAVED FCM TOKEN: $fcmToken");
+// }
+
+// // FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+// //   await SharedPrefs.saveFcmToken(newToken);
+// //   print("🔄 FCM TOKEN REFRESHED: $newToken");
+// // });
+
+// FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+//   final prefs = await SharedPreferences.getInstance();
+//   await prefs.setString('fcmToken', newToken);
+//   print("🔄 FCM TOKEN REFRESHED: $newToken");
+// });
+
+
+//   /// 🔔 FOREGROUND MESSAGE
 //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-//     if (kDebugMode) {
-//      print("🔔 Title: ${message.notification?.title}");
+//     print("🔔 FOREGROUND MESSAGE RECEIVED");
+//     print("📝 Title: ${message.notification?.title}");
 //     print("📝 Body: ${message.notification?.body}");
 //     print("📦 Data: ${message.data}");
-//     }
+
+//     /// ✅ FOREGROUND MAIN LOCAL NOTIFICATION
+//     LocalNotificationService.show(message);
 //   });
 
-//   /// 🔔 NOTIFICATION TAP HANDLER
+//   /// 🔔 TAP HANDLER
 //   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-//     if (kDebugMode) {
-//       print("👉 Notification Clicked: ${message.data}");
-//     }
-
-//     /// yahan future me navigation laga sakte ho
-//     /// example:
-//     /// if (message.data["type"] == "appointment") {
-//     ///   Get.toNamed(Routes.APPOINTMENT_DETAILS);
-//     /// }
+//     print("👉 Notification clicked");
+//     print("📦 Data: ${message.data}");
 //   });
 
-//   /// ------------------ LOAD SAVED LANGUAGE ------------------
+
+//   /// ------------------ LANGUAGE ------------------
 //   String savedLang = SharedPrefs.getLanguage() ?? "en";
 
-//   /// ------------------ PUT CONTROLLERS ------------------
 //   Get.put(LanguageController(), permanent: true);
+  
 //   Get.updateLocale(Locale(savedLang));
 
 //   /// ------------------ EASY LOADING ------------------
@@ -253,13 +112,16 @@
 //     ..userInteractions = false
 //     ..dismissOnTap = false;
 
+
 //   runApp(MyApp());
 // }
+
 
 // class MyApp extends StatelessWidget {
 //   @override
 //   Widget build(BuildContext context) {
 //     final langController = Get.find<LanguageController>();
+    
 
 //     return GetMaterialApp(
 //       debugShowCheckedModeBanner: false,
@@ -287,14 +149,14 @@
 // }
 
 
+import 'dart:async';
+
 import 'package:beh_doctor/TranslationLanguage.dart';
 import 'package:beh_doctor/controller/BottomNavController.dart';
 import 'package:beh_doctor/firebase_options.dart';
 import 'package:beh_doctor/modules/auth/controller/LanguageController.dart';
-import 'package:beh_doctor/views/ErrorScreen.dart';
 import 'package:beh_doctor/views/LocalNotificationService.dart';
 import 'package:beh_doctor/widgets/MyStatusWidget.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -318,73 +180,91 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("📦 Data: ${message.data}");
 }
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  await SharedPrefs.init();
-  await initializeDateFormatting('en', null);
+    /// ✅ GLOBAL FLUTTER ERROR CATCH
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.dumpErrorToConsole(details);
+      print("❌ FLUTTER ERROR: ${details.exception}");
+    };
 
-  /// 🔥 FIREBASE INIT
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+    await SharedPrefs.init();
+    await initializeDateFormatting('en', null);
 
-  /// 🔔 LOCAL NOTIFICATION INIT (IMPORTANT)
-  await LocalNotificationService.init();
+    /// 🔥 FIREBASE INIT
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  /// 🔔 BACKGROUND REGISTER
-  FirebaseMessaging.onBackgroundMessage(
-    firebaseMessagingBackgroundHandler,
-  );
+    /// 🔔 LOCAL NOTIFICATION INIT
+    await LocalNotificationService.init();
 
-  /// 🔔 PERMISSION
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+    /// 🔔 BACKGROUND REGISTER
+    FirebaseMessaging.onBackgroundMessage(
+      firebaseMessagingBackgroundHandler,
+    );
 
-  /// 🔔 TOKEN
-  final token = await FirebaseMessaging.instance.getToken();
-  print("🎯 FCM TOKEN: $token");
+    /// 🔔 PERMISSION
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-  /// 🔔 FOREGROUND MESSAGE
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print("🔔 FOREGROUND MESSAGE RECEIVED");
-    print("📝 Title: ${message.notification?.title}");
-    print("📝 Body: ${message.notification?.body}");
-    print("📦 Data: ${message.data}");
+    /// ✅ FCM TOKEN (SINGLE SOURCE)
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    if (fcmToken != null && fcmToken.isNotEmpty) {
+      await SharedPrefs.saveFcmToken(fcmToken);
+      print("🔥 SAVED FCM TOKEN: $fcmToken");
+    }
 
-    /// ✅ FOREGROUND MAIN LOCAL NOTIFICATION
-    LocalNotificationService.show(message);
+    /// ✅ TOKEN REFRESH (ONLY ONE LISTENER)
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+      await SharedPrefs.saveFcmToken(newToken);
+      print("🔄 FCM TOKEN REFRESHED: $newToken");
+    });
+
+    /// 🔔 FOREGROUND MESSAGE
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("🔔 FOREGROUND MESSAGE RECEIVED");
+      print("📝 Title: ${message.notification?.title}");
+      print("📝 Body: ${message.notification?.body}");
+      print("📦 Data: ${message.data}");
+
+      LocalNotificationService.show(message);
+    });
+
+    /// 🔔 TAP HANDLER
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("👉 Notification clicked");
+      print("📦 Data: ${message.data}");
+    });
+
+    /// ------------------ LANGUAGE ------------------
+    String savedLang = SharedPrefs.getLanguage() ?? "en";
+    Get.put(LanguageController(), permanent: true);
+    Get.updateLocale(Locale(savedLang));
+
+    /// ------------------ EASY LOADING ------------------
+    EasyLoading.instance
+      ..indicatorType = EasyLoadingIndicatorType.threeBounce
+      ..loadingStyle = EasyLoadingStyle.custom
+      ..indicatorSize = 30.0
+      ..backgroundColor = AppColors.color008541
+      ..indicatorColor = Colors.white
+      ..textColor = Colors.white
+      ..radius = 10.0
+      ..userInteractions = false
+      ..dismissOnTap = false;
+
+    runApp(MyApp());
+  }, (error, stack) {
+    /// ✅ RELEASE APK CRASH CATCH
+    print("❌ ZONED ERROR: $error");
+    print(stack);
   });
-
-  /// 🔔 TAP HANDLER
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print("👉 Notification clicked");
-    print("📦 Data: ${message.data}");
-  });
-
-  /// ------------------ LANGUAGE ------------------
-  String savedLang = SharedPrefs.getLanguage() ?? "en";
-
-  Get.put(LanguageController(), permanent: true);
-  Get.updateLocale(Locale(savedLang));
-
-  /// ------------------ EASY LOADING ------------------
-  EasyLoading.instance
-    ..indicatorType = EasyLoadingIndicatorType.threeBounce
-    ..loadingStyle = EasyLoadingStyle.custom
-    ..indicatorSize = 30.0
-    ..backgroundColor = AppColors.color008541
-    ..indicatorColor = Colors.white
-    ..textColor = Colors.white
-    ..radius = 10.0
-    ..userInteractions = false
-    ..dismissOnTap = false;
-
-
-  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -416,4 +296,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

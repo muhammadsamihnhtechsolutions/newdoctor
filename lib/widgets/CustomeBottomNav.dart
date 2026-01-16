@@ -9,9 +9,9 @@ class CustomBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BottomNavController controller = Get.put(
-      BottomNavController(),
-    ); // ✅ SAFE (build ke andar)
+final BottomNavController controller =
+    Get.find<BottomNavController>();
+// ✅ SAFE (build ke andar)
 
     return Container(
       height: 65,

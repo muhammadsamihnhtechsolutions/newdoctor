@@ -225,6 +225,14 @@ class AppTranslations extends Translations {
       'please_enter_medicine_name': 'Please enter medicine name',
       'please_enter_medicine_notes': 'Please enter medicine notes',
       'please_enter_referred_to': 'Please enter referred to',
+
+
+      // Delete account dialog
+'delete_account': 'Delete Account',
+'are_you_sure': 'Are you sure you want to delete this account?',
+'cancel': 'Cancel',
+'delete': 'Delete',
+
     },
 
     'bn': {
@@ -245,6 +253,12 @@ class AppTranslations extends Translations {
       // Hospitals
       'hospitals': 'হাসপাতাল',
       'no_hospital': 'হাসপাতালের তথ্য নেই',
+
+// Delete account dialog
+'delete_account': 'অ্যাকাউন্ট মুছুন',
+'are_you_sure': 'আপনি কি নিশ্চিত এই অ্যাকাউন্টটি মুছে ফেলতে চান?',
+'cancel': 'বাতিল',
+'delete': 'মুছুন',
 
       // Button
       'edit_profile': 'প্রোফাইল সম্পাদনা করুন',

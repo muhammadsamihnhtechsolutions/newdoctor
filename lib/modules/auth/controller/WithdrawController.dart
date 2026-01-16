@@ -30,26 +30,52 @@ class WithdrawAccountController extends GetxController {
 
   // ---------------- LOAD BANK + MFS + DISTRICT ----------------
   Future<void> fetchReferenceData() async {
-    try {
-      final bankRes = await repo.getBankAndMfsListResponse({"type": "bank"});
-      final allRes = await repo.getBankAndMfsListResponse({});
-      final distRes = await repo.districtListResponse();
+  try {
+    final bankRes = await repo.getBankAndMfsListResponse({"type": "bank"});
+    final allRes = await repo.getBankAndMfsListResponse({});
+    final distRes = await repo.districtListResponse();
 
-      if (bankRes.bankList != null) {
-        bankList = bankRes.bankList!;
-      }
+    if (bankRes.bankList != null) {
+      bankList = bankRes.bankList!;
+    }
 
-      if (allRes.bankList != null) {
-        mfsList = allRes.bankList!.where((e) => e.type == "mfs").toList();
-      }
+    if (allRes.bankList != null) {
+      mfsList = allRes.bankList!
+          .where((e) => e.type == "mfs")
+          .toList();
+    }
 
-      if (distRes.districtList != null) {
-        districtList = distRes.districtList!;
-      }
-    } catch (_) {}
-
-    fetchAccounts();
+    if (distRes.districtList != null) {
+      districtList = distRes.districtList!;
+    }
+  } catch (_) {
+    // intentionally ignored
+  } finally {
+    fetchAccounts(); // ✅ analyzer happy
   }
+}
+
+  // Future<void> fetchReferenceData() async {
+  //   try {
+  //     final bankRes = await repo.getBankAndMfsListResponse({"type": "bank"});
+  //     final allRes = await repo.getBankAndMfsListResponse({});
+  //     final distRes = await repo.districtListResponse();
+
+  //     if (bankRes.bankList != null) {
+  //       bankList = bankRes.bankList!;
+  //     }
+
+  //     if (allRes.bankList != null) {
+  //       mfsList = allRes.bankList!.where((e) => e.type == "mfs").toList();
+  //     }
+
+  //     if (distRes.districtList != null) {
+  //       districtList = distRes.districtList!;
+  //     }
+  //   } catch (_) {}
+
+  //   fetchAccounts();
+  // }
 
   // ---------------- FETCH ACCOUNT LIST ----------------
   Future<void> fetchAccounts() async {
@@ -97,4 +123,19 @@ class WithdrawAccountController extends GetxController {
   void changeTab(int index) {
     selectedTab.value = index;
   }
+  Future<void> deleteAccount(String accountId) async {
+  isLoading.value = true;
+
+  final response = await repo.deletePayoutAccount(accountId);
+
+  if (response.status == "success") {
+    await fetchAccounts(); // 🔥 list refresh
+    Get.snackbar("Success", response.message ?? "Account deleted");
+  } else {
+    Get.snackbar("Error", response.message ?? "Failed to delete account");
+  }
+
+  isLoading.value = false;
+}
+
 }

@@ -18,9 +18,9 @@ class BottomNavScreen extends StatefulWidget {
 class _BottomNavScreenState extends State<BottomNavScreen> {
   // ✅ SAFE controller access
 
-  final BottomNavController _bottomNavController = Get.put(
-    BottomNavController(),
-  );
+ final BottomNavController _bottomNavController =
+    Get.find<BottomNavController>();
+
   @override
   Widget build(BuildContext context) {
     final pages = [

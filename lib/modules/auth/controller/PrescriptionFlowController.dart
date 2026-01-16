@@ -1,4 +1,7 @@
 
+import 'package:beh_doctor/models/CheifComplaint.dart';
+import 'package:beh_doctor/models/DiagnosisModel.dart';
+import 'package:beh_doctor/models/SurgerymModel.dart';
 import 'package:get/get.dart';
 import 'package:beh_doctor/models/MedicineTrackerModel.dart';
 import 'package:beh_doctor/models/InvestigationModel.dart';
@@ -31,6 +34,31 @@ class PrescriptionFlowController extends GetxController {
 
   RxBool isInvestigationLoading = false.obs;
 
+  // ================= CHIEF COMPLAINT API =================
+final ChiefComplaintRepo _chiefRepo = ChiefComplaintRepo();
+
+RxList<ChiefComplaint> chiefComplaintOptions =
+    <ChiefComplaint>[].obs;
+
+Rx<ChiefComplaint?> selectedChiefComplaint =
+    Rx<ChiefComplaint?>(null);
+
+RxBool isChiefComplaintLoading = false.obs;
+
+// ================= DIAGNOSIS API =================
+final DiagnosisRepo _diagnosisRepo = DiagnosisRepo();
+
+RxList<Diagnosis> diagnosisOptions = <Diagnosis>[].obs;
+Rx<Diagnosis?> selectedDiagnosis = Rx<Diagnosis?>(null);
+
+RxBool isDiagnosisLoading = false.obs;
+
+// ================= SURGERY API =================
+final SurgeryRepo _surgeryRepo = SurgeryRepo();
+
+RxList<Surgery> surgeryOptions = <Surgery>[].obs;
+RxBool isSurgeryLoading = false.obs;
+
   // ---------------- REQUIRED FIELDS ----------------
   RxString followUpDate = "".obs;
   RxString referredTo = "".obs;
@@ -40,7 +68,10 @@ class PrescriptionFlowController extends GetxController {
   void onInit() {
     super.onInit();
     fetchMedicineNames();       // ✅ PURANA
-    fetchInvestigations();      // ✅ NEW
+    fetchInvestigations(); 
+      fetchChiefComplaints();  
+        fetchDiagnosis(); 
+          fetchSurgeries();  // ✅ NEW
   }
 
   // ================= FETCH MEDICINES (PURANA – SAME) =================
@@ -98,28 +129,104 @@ class PrescriptionFlowController extends GetxController {
       print("❌ addInvestigationFromDropdown error: $e");
     }
   }
+  // ================= FETCH CHIEF COMPLAINTS =================
+Future<void> fetchChiefComplaints() async {
+  try {
+    print("🟡 fetchChiefComplaints called");
+    isChiefComplaintLoading.value = true;
 
-  // ---------------- ADD (PURANA – SAME) ----------------
-  void addChiefComplaint(String v) {
-    v = v.trim();
-    if (v.isNotEmpty && !chiefComplaints.contains(v)) {
+    final res = await _chiefRepo.getChiefComplaintList();
+    chiefComplaintOptions.assignAll(res);
+
+    print(
+      "✅ chief complaints fetched: ${chiefComplaintOptions.map((e) => e.name).toList()}",
+    );
+  } catch (e) {
+    print("❌ fetchChiefComplaints error: $e");
+  } finally {
+    isChiefComplaintLoading.value = false;
+  }
+}
+
+// ================= ADD FROM DROPDOWN =================
+void addChiefComplaintFromDropdown(ChiefComplaint cc) {
+  try {
+    print("🟡 addChiefComplaintFromDropdown: ${cc.name}");
+
+    final v = cc.name.trim();
+    if (v.isEmpty) return;
+
+    if (!chiefComplaints.contains(v)) {
       chiefComplaints.add(v);
     }
-  }
 
-  void addDiagnosis(String v) {
-    v = v.trim();
-    if (v.isNotEmpty && !diagnosisList.contains(v)) {
-      diagnosisList.add(v);
-    }
+    print("✅ chiefComplaints: $chiefComplaints");
+  } catch (e) {
+    print("❌ addChiefComplaintFromDropdown error: $e");
   }
+}
+// diagnosisList
+Future<void> fetchDiagnosis() async {
+  try {
+    print("🟡 fetchDiagnosis called");
+    isDiagnosisLoading.value = true;
 
-  void addSurgery(String v) {
-    v = v.trim();
-    if (v.isNotEmpty && !surgeryList.contains(v)) {
-      surgeryList.add(v);
-    }
+    final res = await _diagnosisRepo.getDiagnosisList();
+    diagnosisOptions.assignAll(res);
+  } catch (e) {
+    print("❌ fetchDiagnosis error: $e");
+  } finally {
+    isDiagnosisLoading.value = false;
   }
+}
+
+void addDiagnosisFromDropdown(Diagnosis d) {
+  print("🟡 addDiagnosisFromDropdown: ${d.name}");
+
+  final v = d.name.trim();
+  if (v.isEmpty) return;
+
+  diagnosisList
+    ..clear()
+    ..add(v);
+
+  print("✅ diagnosisList: $diagnosisList");
+}
+
+  Future<void> fetchSurgeries() async {
+  try {
+    print("🟡 fetchSurgeries called");
+    isSurgeryLoading.value = true;
+
+    final res = await _surgeryRepo.getSurgeryList();
+    surgeryOptions.assignAll(res);
+
+    print("✅ surgeries fetched: ${surgeryOptions.map((e) => e.name).toList()}");
+  } catch (e) {
+    print("❌ fetchSurgeries error: $e");
+  } finally {
+    isSurgeryLoading.value = false;
+  }
+}
+
+void addSurgeryFromDropdown(Surgery s) {
+  try {
+    print("🟡 addSurgeryFromDropdown: ${s.name}");
+
+    final v = s.name.trim();
+    if (v.isEmpty) return;
+
+    surgeryList.clear(); // single select
+    surgeryList.add(v);
+
+    print("✅ surgeryList: $surgeryList");
+  } catch (e) {
+    print("❌ addSurgeryFromDropdown error: $e");
+  }
+}
+
+
+  
 
   // ---------------- MEDICINE (PURANA – SAME) ----------------
   void addMedicineFromDropdown(Medication med) {
@@ -163,30 +270,50 @@ class PrescriptionFlowController extends GetxController {
 
   // ---------------- PAYLOAD (PURANA – SAME) ----------------
   Map<String, dynamic> buildPayload(String appointmentId) {
-    final payload = {
-      "id": appointmentId,
-      "note": chiefComplaints.isNotEmpty ? chiefComplaints.first : "",
-      "diagnosis": diagnosisList.isNotEmpty ? [diagnosisList.first] : [],
-      "investigations":
-          investigationList.isNotEmpty ? [investigationList.first] : [],
-      "surgery": surgeryList.isNotEmpty ? [surgeryList.first] : [],
-      "medicines": medicines.map((m) {
-        return {
-          "medicine": m["name"] ?? "",
-          "instruction":
-              (m["note"] == null || m["note"]!.isEmpty)
-                  ? "Take as advised"
-                  : m["note"]!.trim(),
-        };
-      }).toList(),
-      if (followUpDate.value.isNotEmpty)
-        "followUpDate": followUpDate.value,
-      "referredTo": referredTo.value.trim(),
-    };
+  final payload = {
+    "id": appointmentId,
 
-    print("📦 FINAL PAYLOAD: $payload");
-    return payload;
-  }
+    // ✅ Chief Complaint (single)
+    "note": chiefComplaints.isNotEmpty
+        ? chiefComplaints.first.toString()
+        : "",
+
+    // ✅ Diagnosis (array as backend expect karta hai)
+    "diagnosis": diagnosisList.isNotEmpty
+        ? [diagnosisList.first]
+        : [],
+
+    // ✅ Investigations
+    "investigations": investigationList.isNotEmpty
+        ? [investigationList.first]
+        : [],
+
+    // ✅ Surgery
+    "surgery": surgeryList.isNotEmpty
+        ? [surgeryList.first]
+        : [],
+
+    // ✅ Medicines
+    "medicines": medicines.map((m) {
+      return {
+        "medicine": m["name"] ?? "",
+        "instruction":
+            (m["note"] == null || m["note"]!.isEmpty)
+                ? "Take as advised"
+                : m["note"]!.trim(),
+      };
+    }).toList(),
+
+    if (followUpDate.value.isNotEmpty)
+      "followUpDate": followUpDate.value,
+
+    "referredTo": referredTo.value.trim(),
+  };
+
+  print("📦 FINAL PAYLOAD: $payload");
+  return payload;
+}
+
 
   // ---------------- RESET (PURANA – SAME) ----------------
   void resetFlow() {
@@ -195,6 +322,7 @@ class PrescriptionFlowController extends GetxController {
     diagnosisList.clear();
     investigationList.clear();
     surgeryList.clear();
+    
     medicines.clear();
     followUpDate.value = "";
     referredTo.value = "";

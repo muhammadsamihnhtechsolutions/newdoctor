@@ -1,5 +1,6 @@
+import 'package:beh_doctor/controller/BottomNavController.dart';
 import 'package:beh_doctor/views/BottomNavScreen.dart';
-import 'package:beh_doctor/views/HomePage.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -77,10 +78,17 @@ class WithdrawSuccessScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+                // onPressed: () {
+                //   // NAVIGATE TO BOTTOM NAV SCREEN
+                //   Get.offAll(() =>  BottomNavScreen());
+                // },
+                
                 onPressed: () {
-                  /// 🔥 CLEAR FLOW – BACK TO HOME
-               Get.to(() =>  BottomNavScreen());
-                },
+  final bottomNav = Get.find<BottomNavController>();
+  bottomNav.changeTab(0);
+  Get.offAll(() => BottomNavScreen());
+}
+,
                 child: const Text(
                   "Back to Home",
                   style: TextStyle(

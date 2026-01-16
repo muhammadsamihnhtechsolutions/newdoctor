@@ -46,49 +46,57 @@ class _BasicInfoTabState extends State<BasicInfoTab> {
   // ================= IMAGE PICKER =================
 
   void _showImagePicker() {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt, color: _green),
-              title: const Text("Camera"),
-              onTap: () {
-                Get.back();
-                _pickImage(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library, color: _green),
-              title: const Text("Gallery"),
-              onTap: () {
-                Get.back();
-                _pickImage(ImageSource.gallery);
-              },
-            ),
-          ],
-        ),
+  Get.bottomSheet(
+    Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-    );
-  }
+      child: Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.camera_alt, color: _green),
+            title: const Text("Camera"),
+            onTap: () {
+              Get.back();
+              _pickImage(ImageSource.camera); // ✅ FIX
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library, color: _green),
+            title: const Text("Gallery"),
+            onTap: () {
+              Get.back();
+              _pickImage(ImageSource.gallery); // ✅ FIX
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
-  Future<void> _pickImage(ImageSource source) async {
-    final XFile? picked =
-        await ImagePicker().pickImage(source: source, imageQuality: 60);
+Future<void> _pickImage(ImageSource source) async {
+  final XFile? picked =
+      await ImagePicker().pickImage(source: source, imageQuality: 60);
 
-    if (picked == null) return;
+  if (picked == null) return;
 
-    selectedImage = File(picked.path);
-    final base64 = base64Encode(selectedImage!.readAsBytesSync());
+  final file = File(picked.path);
+  final bytes = await file.readAsBytes();
+  final base64Image = base64Encode(bytes);
 
-    await controller.uploadProfileImage(base64);
-    setState(() {});
-  }
+  final extension = picked.path.split('.').last.toLowerCase();
+
+  // ✅ controller call (correct place)
+  await controller.uploadProfileImage(base64Image, extension);
+
+  setState(() {
+    selectedImage = file; // UI update
+  });
+}
+
 
   // ================= UI =================
 
@@ -261,12 +269,17 @@ Future<void> updateProfile() async {
     Get.snackbar("error".tr, "please_select_hospital".tr);
     return;
   }
-    if (selectedImage != null) {
-      final base64 =
-          base64Encode(selectedImage!.readAsBytesSync());
 
-      await controller.uploadProfileImage(base64);
-    }
+  // ✅ FIX: image upload (with extension)
+  if (selectedImage != null) {
+    final file = selectedImage!;
+    final bytes = await file.readAsBytes();
+    final base64 = base64Encode(bytes);
+    final extension = file.path.split('.').last.toLowerCase();
+
+    await controller.uploadProfileImage(base64, extension);
+  }
+
   final params = {
     "name": nameCtrl.text.trim(),
     "about": aboutCtrl.text.trim(),
@@ -274,10 +287,8 @@ Future<void> updateProfile() async {
     "bmdcCode": bmdcCtrl.text.trim(),
     "gender": selectedGender,
 
-    // ✅ FIX 1: LIST ❌ → STRING ✅
+    // ✅ already correct
     "specialty": selectedSpecialties.first,
-
-    // ✅ FIX 2: hospital REQUIRED by backend
     "hospital": controller.selectedHospitalId.value,
   };
 
@@ -290,6 +301,7 @@ Future<void> updateProfile() async {
     );
   }
 }
+
 
 
   Widget _field(String label, TextEditingController c,

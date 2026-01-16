@@ -70,16 +70,24 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     );
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final XFile? picked = await ImagePicker().pickImage(source: source);
-    if (picked != null) {
-      selectedImage = File(picked.path);
-      final bytes = selectedImage!.readAsBytesSync();
-      final base64 = base64Encode(bytes);
-      await controller.uploadProfileImage(base64);
-      setState(() {});
-    }
-  }
+  
+
+Future<void> _pickImage(ImageSource source) async {
+  final XFile? picked = await ImagePicker().pickImage(source: source);
+  if (picked == null) return;
+
+  selectedImage = File(picked.path);
+
+  final bytes = await selectedImage!.readAsBytes();
+  final base64 = base64Encode(bytes);
+
+  /// 🔥 EXTENSION AUTO DETECT
+  final extension = picked.path.split('.').last.toLowerCase();
+
+  await controller.uploadProfileImage(base64, extension);
+
+  setState(() {});
+}
 
   /// ================= UI =================
   @override
@@ -270,34 +278,39 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   }
 
   /// ================= CREATE PROFILE =================
-  Future<void> _createProfile() async {
-    if (selectedGender == null) {
-      Get.snackbar("Error", "Please select gender");
-      return;
-    }
-
-    if (controller.selectedSpecialtyIds.isEmpty ||
-        controller.selectedHospitalIds.isEmpty) {
-      Get.snackbar("Error", "Please select all fields");
-      return;
-    }
-
-    final params = {
-      "name": nameCtrl.text.trim(),
-      "about": aboutCtrl.text.trim(),
-      "experienceInYear": expCtrl.text.trim(),
-      "bmdcCode": bmdcCtrl.text.trim(),
-      "gender": selectedGender,
-      "specialty": controller.selectedSpecialtyIds.first,
-      "hospital": controller.selectedHospitalIds.first,
-    };
-
-    final ok = await controller.createDoctorProfile(params);
-    if (ok) {
-      await controller.fetchDoctorProfile();
-      Get.offAll(() => BottomNavScreen());
-    }
+Future<void> _createProfile() async {
+  if (selectedGender == null) {
+    Get.snackbar("Error", "Please select gender");
+    return;
   }
+
+  if (controller.selectedSpecialtyIds.isEmpty ||
+      controller.selectedHospitalIds.isEmpty) {
+    Get.snackbar("Error", "Please select all fields");
+    return;
+  }
+
+  final params = {
+    "name": nameCtrl.text.trim(),
+    "about": aboutCtrl.text.trim(),
+    "experienceInYear": expCtrl.text.trim(),
+    "bmdcCode": bmdcCtrl.text.trim(),
+    "gender": selectedGender,
+    "specialty": controller.selectedSpecialtyIds.first,
+    "hospital": controller.selectedHospitalIds.first,
+  };
+
+  try {
+    await controller.createDoctorProfile(params);
+    await controller.fetchDoctorProfile();
+
+    /// ✅ FORCE NAVIGATION (NO FAIL)
+    Get.offAll(() => BottomNavScreen());
+  } catch (e) {
+    Get.snackbar("Error", "Profile create failed");
+  }
+}
+
 
   /// ================= FIELD =================
   Widget _field(String label, TextEditingController c,

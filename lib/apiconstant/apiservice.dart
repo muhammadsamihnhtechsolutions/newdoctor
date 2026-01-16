@@ -52,26 +52,41 @@
 import 'package:dio/dio.dart';
 import 'package:beh_doctor/shareprefs.dart';
 
-// class ApiService {
-//   final Dio _dio = Dio();
 
-//   ApiService() {
-//     _dio.options.connectTimeout = const Duration(seconds: 60);
-//     _dio.options.receiveTimeout = const Duration(seconds: 60);
-//   }
 class ApiService {
   final Dio _dio = Dio();
 
-  ApiService() {
-    _dio.options.connectTimeout = const Duration(seconds: 60);
-    _dio.options.receiveTimeout = const Duration(seconds: 60);
+  // ApiService() {
+  //   _dio.options.connectTimeout = const Duration(seconds: 60);
+  //   _dio.options.receiveTimeout = const Duration(seconds: 60);
 
-    // 🔥 ADD THIS — MOST IMPORTANT
-    _dio.options.validateStatus = (status) {
-      return status != null && status < 500;
-      // ✅ 200, 400, 401, 422 all treated as NORMAL responses
-    };
-  }
+  //   // 🔥 ADD THIS — MOST IMPORTANT
+  //   _dio.options.validateStatus = (status) {
+  //     return status != null && status < 500;
+  //     // ✅ 200, 400, 401, 422 all treated as NORMAL responses
+  //   };
+  // }
+ApiService() {
+  _dio.options
+    ..connectTimeout = const Duration(seconds: 30)
+    ..receiveTimeout = const Duration(seconds: 30)
+    ..sendTimeout = const Duration(seconds: 30);
+
+  _dio.options.validateStatus = (status) {
+    return status != null && status < 500;
+  };
+
+  /// 🔥 IMPORTANT: freeze prevent
+  _dio.interceptors.add(
+    InterceptorsWrapper(
+      onError: (e, handler) {
+        print("❌ DIO ERROR TYPE: ${e.type}");
+        print("❌ DIO ERROR: ${e.message}");
+        return handler.next(e);
+      },
+    ),
+  );
+}
 
 
   /// Internal method to get token safely
@@ -230,4 +245,41 @@ class ApiService {
       return {'status': 'error', 'message': 'Unexpected error'};
     }
   }
+  // ----------------------------------------------------------
+//               ⭐ DELETE REQUEST SERVICE ⭐
+// ----------------------------------------------------------
+Future<Map<String, dynamic>> getDeleteResponse(String url) async {
+  try {
+    final token = await _getToken();
+    if (token == null) {
+      return {'status': 'error', 'message': 'Token missing, login again'};
+    }
+
+    print("🗑️ DELETE URL: $url");
+
+    final response = await _dio.delete(
+      url,
+      options: Options(headers: {..._buildHeaders(token: token)}),
+    );
+
+    print("✅ DELETE RESPONSE: ${response.data}");
+    return response.data as Map<String, dynamic>;
+  } on DioException catch (e) {
+    print("❌ DELETE DIO ERROR: ${e.message}");
+
+    if (e.response?.statusCode == 401) {
+      return {'status': 'error', 'message': 'Unauthorized, login again'};
+    }
+
+    if (e.response != null) {
+      return e.response!.data as Map<String, dynamic>;
+    }
+
+    return {'status': 'error', 'message': 'Network error'};
+  } catch (err) {
+    print("❌ DELETE UNEXPECTED ERROR: $err");
+    return {'status': 'error', 'message': 'Unexpected error'};
+  }
+}
+
 }

@@ -47,21 +47,32 @@ class AppPages {
     ),
 
     /// OTP Screen
-    GetPage(
-      name: Routes.OTP,
-      page: () => OtpScreen(traceId: '', bottomNavRoute: ''),
-    ),
-
     // GetPage(
-    //   name: Routes.DoctorProfileScreen,
-    //   page: () => DoctorProfileScreen(),
+    //   name: Routes.OTP,
+    //   page: () => OtpScreen(traceId: '', bottomNavRoute: ''),
     // ),
+
+GetPage(
+  name: Routes.OTP,
+  page: () {
+    final args = Get.arguments as Map<String, dynamic>?;
+
+    return OtpScreen(
+      traceId: args?['traceId'] ?? '',
+      bottomNavRoute: args?['bottomNavRoute'] ?? '',
+    );
+  },
+),
+
 GetPage(
   name: Routes.DoctorProfileScreen,
   page: () => DoctorProfileScreen(),
-  binding: BindingsBuilder(() {
+ binding: BindingsBuilder(() {
+  if (!Get.isRegistered<DoctorProfileController>()) {
     Get.put(DoctorProfileController());
-  }),
+  }
+}),
+
 ),
 
 

@@ -122,29 +122,43 @@ class AddBankScreen extends StatelessWidget {
                     const SizedBox(height: 28),
 
                     // ---------------- SUBMIT ----------------
-                    GestureDetector(
-                      onTap: () {
-                        controller.submit();
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: appGreen,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "SUBMIT",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                 Obx(() => GestureDetector(
+      onTap: controller.isLoading.value
+          ? null
+          : () {
+              controller.submit();
+            },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: controller.isLoading.value
+              ? appGreen.withOpacity(0.7)
+              : appGreen,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: controller.isLoading.value
+              ? const SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : const Text(
+                  "SUBMIT",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+        ),
+      ),
+    )),
+
 
                     const SizedBox(height: 30),
                   ],

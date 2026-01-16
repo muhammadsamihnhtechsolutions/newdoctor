@@ -25,11 +25,14 @@ class BankAccountsWidget extends StatelessWidget {
           final acc = controller.bankAccounts[index];
 
           return Card(
+            
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            
             elevation: 2,
             child: ListTile(
+              
               title: Text(
                 acc.bankName,
                 style: const TextStyle(fontWeight: FontWeight.bold),
@@ -50,3 +53,4 @@ class BankAccountsWidget extends StatelessWidget {
     });
   }
 }
+

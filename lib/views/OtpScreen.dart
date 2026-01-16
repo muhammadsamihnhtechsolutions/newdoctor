@@ -19,10 +19,14 @@ class OtpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // final OtpController controller = Get.put(
+    //   OtpController(isForChangePhone: isForChangePhone),
+    //   permanent: true,
+    // );
     final OtpController controller = Get.put(
-      OtpController(isForChangePhone: isForChangePhone),
-      permanent: true,
-    );
+  OtpController(isForChangePhone: isForChangePhone),
+);
+
 
     return Scaffold(
       backgroundColor: AppColors.white,

@@ -3,6 +3,8 @@
 import 'dart:async';
 import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
+import 'package:beh_doctor/repo/FcmHelper.dart';
+import 'package:beh_doctor/shareprefs.dart';
 import 'package:beh_doctor/views/BottomNavScreen.dart';
 import 'package:beh_doctor/views/CreateProfileScreen.dart';
 import 'package:get/get.dart';
@@ -49,9 +51,20 @@ class OtpController extends GetxController {
 
     try {
       isOtpLoading.value = true;
+final deviceToken = await FcmHelper.ensureToken();
 
-      final prefs = await SharedPreferences.getInstance();
-      final deviceToken = DateTime.now().millisecondsSinceEpoch.toString();
+if (deviceToken == null || deviceToken.isEmpty) {
+  Get.snackbar(
+    'error'.tr,
+    'Device token not ready. Please wait & try again.',
+  );
+  return;
+}
+
+print("📲 DEVICE TOKEN => $deviceToken");
+
+
+
 
       final result = isForChangePhone
           ? await repo.verifyChangePhoneOtp(
@@ -91,7 +104,8 @@ class OtpController extends GetxController {
       // 🔹 LOGIN SUCCESS (UNCHANGED)
       // =================================================
       if (result.data?.token != null) {
-        await prefs.setString('authToken', result.data!.token!);
+    await SharedPrefs.saveToken(result.data!.token!);
+
 
         final doctorController = Get.put(
           DoctorProfileController(),

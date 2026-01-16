@@ -63,7 +63,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class BottomNavController extends GetxController {
   final RxInt currentIndex = 0.obs;
   late final PageController pageController;
@@ -75,9 +74,23 @@ class BottomNavController extends GetxController {
   }
 
   void changeTab(int i) {
+    // 🔒 SAFETY CHECKS (CRASH FIX)
     if (!pageController.hasClients) return;
+
+    // ⚠️ ye check hi actual bug fix hai
+    if (pageController.positions.length != 1) return;
+
+    if (currentIndex.value == i) return;
+
     currentIndex.value = i;
-    pageController.jumpToPage(i);
+
+    // jumpToPage se pehle safe state
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (pageController.hasClients &&
+          pageController.positions.length == 1) {
+        pageController.jumpToPage(i);
+      }
+    });
   }
 
   @override
@@ -86,3 +99,4 @@ class BottomNavController extends GetxController {
     super.onClose();
   }
 }
+
