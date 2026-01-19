@@ -164,30 +164,30 @@ class SharedPrefs {
 
   // ====================== 🔔 FCM TOKEN (FIX) ======================
 
-  static Future saveFcmToken(String token) async {
-    try {
-      await _prefs?.setString("fcmToken", token);
-    } catch (e) {
-      print("saveFcmToken error: $e");
-    }
-  }
+  // static Future saveFcmToken(String token) async {
+  //   try {
+  //     await _prefs?.setString("fcmToken", token);
+  //   } catch (e) {
+  //     print("saveFcmToken error: $e");
+  //   }
+  // }
 
-  static String getFcmToken() {
-    try {
-      return _prefs?.getString("fcmToken") ?? "";
-    } catch (e) {
-      print("getFcmToken error: $e");
-      return "";
-    }
-  }
+  // static String getFcmToken() {
+  //   try {
+  //     return _prefs?.getString("fcmToken") ?? "";
+  //   } catch (e) {
+  //     print("getFcmToken error: $e");
+  //     return "";
+  //   }
+  // }
 
-  static Future clearFcmToken() async {
-    try {
-      await _prefs?.remove("fcmToken");
-    } catch (e) {
-      print("clearFcmToken error: $e");
-    }
-  }
+  // static Future clearFcmToken() async {
+  //   try {
+  //     await _prefs?.remove("fcmToken");
+  //   } catch (e) {
+  //     print("clearFcmToken error: $e");
+  //   }
+  // }
 
   // ====================== LANGUAGE ======================
 
