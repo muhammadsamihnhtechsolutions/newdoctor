@@ -201,9 +201,8 @@
 //   }
 // }
 
-
 import 'dart:async';
-
+import 'dart:io';
 
 import 'package:beh_doctor/main.dart';
 import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
@@ -212,11 +211,14 @@ import 'package:beh_doctor/repo/AuthRepo.dart';
 import 'package:beh_doctor/shareprefs.dart';
 import 'package:beh_doctor/views/BottomNavScreen.dart';
 import 'package:beh_doctor/views/CreateProfileScreen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpController extends GetxController {
   final AuthRepo repo = AuthRepo();
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   var otpCode = ''.obs;
   var isOtpLoading = false.obs;
@@ -231,6 +233,65 @@ class OtpController extends GetxController {
   bool isForChangePhone = false;
 
   OtpController({this.isForChangePhone = false});
+
+  void requestNotificationPermission() async {
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: true,
+      badge: true,
+      carPlay: true,
+      criticalAlert: true,
+      provisional: true,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      if (kDebugMode) {
+        print('user granted permission');
+        getDeviceToken();
+      }
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+      if (kDebugMode) {
+        print('user granted provisional permission');
+      }
+    } else {
+      //appsetting.AppSettings.openNotificationSettings();
+      if (kDebugMode) {
+        print('user denied permission');
+      }
+    }
+  }
+
+  Future<String> getDeviceToken() async {
+    // Request permissions
+    await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      announcement: true,
+      carPlay: true,
+      criticalAlert: true,
+      provisional: true,
+    );
+
+    // iOS specific check
+    if (Platform.isIOS) {
+      String? apns = await messaging.getAPNSToken();
+      print("🔑 APNs Token: $apns");
+
+      if (apns == null) {
+        print("❌ APNs token not yet set, returning empty.");
+        return '';
+      }
+    }
+
+    // Fetch FCM token
+    String? token = await messaging.getToken();
+    print("🎯 FCM Token: $token");
+
+    return token ?? 'dummy';
+  }
 
   // =====================================================
   // 🔹 VERIFY OTP
@@ -253,14 +314,10 @@ class OtpController extends GetxController {
     try {
       isOtpLoading.value = true;
 
-      /// ✅ DEVICE TOKEN (NO SAVE, MAIN.DART FLOW)
-      final String deviceToken = await getDeviceToken();
+      String? deviceToken = await getDeviceToken();
 
       if (deviceToken.isEmpty) {
-        Get.snackbar(
-          'error'.tr,
-          'Device token not ready. Please try again.',
-        );
+        Get.snackbar('error'.tr, 'Device token not ready. Please try again.');
         return;
       }
 

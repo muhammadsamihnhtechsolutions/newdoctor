@@ -101,7 +101,6 @@
 //   }
 // }
 
-
 // import 'package:beh_doctor/controller/BottomNavController.dart';
 // import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
 // import 'package:beh_doctor/repo/AuthRepo.dart';
@@ -151,7 +150,6 @@
 //   }
 // }
 
-
 import 'package:beh_doctor/controller/BottomNavController.dart';
 import 'package:beh_doctor/modules/auth/controller/DoctorProfileController.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
@@ -181,11 +179,11 @@ class LogoutController extends GetxController {
       await prefs.remove('token');
 
       /// 🔄 RESET CONTROLLERS
-      Get.delete<BottomNavController>(force: true);
-      Get.delete<DoctorProfileController>(force: true);
+      // Get.delete<BottomNavController>(force: true);
+      // Get.delete<DoctorProfileController>(force: true);
 
-      Get.put(LanguageController(), permanent: true);
-      Get.put(BottomNavController(), permanent: true);
+      // Get.put(LanguageController(), permanent: true);
+      // Get.put(BottomNavController(), permanent: true);
 
       /// 🚪 GO TO LOGIN
       Get.offAllNamed('/login');

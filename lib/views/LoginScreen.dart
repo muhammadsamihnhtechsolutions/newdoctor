@@ -1,6 +1,3 @@
-
-
-
 // import 'package:beh_doctor/views/PrivacyPolichyPage.dart';
 // import 'package:beh_doctor/views/TermsAndConditionsPage.dart';
 // import 'package:flutter/material.dart';
@@ -186,7 +183,9 @@
 //   }
 // }
 
+// ignore_for_file: unused_local_variable
 
+import 'package:beh_doctor/main.dart';
 import 'package:beh_doctor/views/PrivacyPolichyPage.dart';
 import 'package:beh_doctor/views/TermsAndConditionsPage.dart';
 import 'package:flutter/material.dart';
@@ -251,20 +250,19 @@ class LoginScreen extends StatelessWidget {
                     keyboardType: TextInputType.phone,
                     cursorColor: appGreen,
                     maxLength: 10,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       counterText: "",
                       labelText: 'enter_phone_number'.tr,
-                      labelStyle:
-                          TextStyle(color: Colors.grey.shade600),
+                      labelStyle: TextStyle(color: Colors.grey.shade600),
                       filled: true,
                       fillColor: Colors.grey.shade100,
 
                       prefixIcon: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 14),
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
                         child: Text(
                           "+880",
                           style: const TextStyle(
@@ -273,31 +271,29 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      prefixIconConstraints:
-                          const BoxConstraints(minWidth: 0, minHeight: 0),
+                      prefixIconConstraints: const BoxConstraints(
+                        minWidth: 0,
+                        minHeight: 0,
+                      ),
 
                       errorText:
                           controller.loginInputPhone.value.isNotEmpty &&
-                                  !controller.isPhoneValid
-                              ? 'enter_phone_number'.tr
-                              : null,
+                              !controller.isPhoneValid
+                          ? 'enter_phone_number'.tr
+                          : null,
 
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide:
-                            const BorderSide(color: appGreen),
+                        borderSide: const BorderSide(color: appGreen),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(
-                            color: appGreen, width: 2),
+                        borderSide: const BorderSide(color: appGreen, width: 2),
                       ),
                     ),
                     onChanged: (value) {
-                      controller.loginInputPhone.value =
-                          value.trim();
-                      controller.loginInputDialCode.value =
-                          "+880";
+                      controller.loginInputPhone.value = value.trim();
+                      controller.loginInputDialCode.value = "+880";
                     },
                   ),
                 ),
@@ -306,60 +302,59 @@ class LoginScreen extends StatelessWidget {
 
                 // -------- CONTINUE BUTTON --------
                 Obx(
-  () => SizedBox(
-    width: double.infinity,
-    height: 55,
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: appGreen,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-      ),
+                  () => SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: appGreen,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
 
-      onPressed: controller.isLoading.value ||
-              !controller.isPhoneValid
-          ? null
-          : () async {
-              debugPrint("🟢 CONTINUE CLICKED (SEND OTP)");
+                      onPressed:
+                          controller.isLoading.value || !controller.isPhoneValid
+                          ? null
+                          : () async {
+                              debugPrint("🟢 CONTINUE CLICKED (SEND OTP)");
 
-              try {
-                await controller.sendOtp();
-              } catch (e, s) {
-                debugPrint("❌ CRASH ON SEND OTP: $e");
-                debugPrintStack(stackTrace: s);
+                              try {
+                                // String? token = await getDeviceToken();
 
-                Get.snackbar(
-                  "error".tr,
-                  "Something crashed. Check logs.",
-                );
-              }
-            },
+                                await controller.sendOtp();
+                              } catch (e, s) {
+                                debugPrint("❌ CRASH ON SEND OTP: $e");
+                                debugPrintStack(stackTrace: s);
 
-      child: controller.isLoading.value
-          ? const SizedBox(
-              height: 22,
-              width: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            )
-          : Text(
-              "continue".tr,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-    ),
-  ),
-)
+                                Get.snackbar(
+                                  "error".tr,
+                                  "Something crashed. Check logs.",
+                                );
+                              }
+                            },
 
-               
-,
+                      child: controller.isLoading.value
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              "continue".tr,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 25),
 
                 // -------- TERMS & CONDITIONS --------
@@ -375,8 +370,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Get.to(() =>
-                            const TermsAndConditionsPage());
+                        Get.to(() => const TermsAndConditionsPage());
                       },
                       child: const Text(
                         "terms_conditions",
@@ -394,8 +388,7 @@ class LoginScreen extends StatelessWidget {
 
                 GestureDetector(
                   onTap: () {
-                    Get.to(() =>
-                        const PrivacyPolicyPage());
+                    Get.to(() => const PrivacyPolicyPage());
                   },
                   child: Text(
                     "privacy_policy_applies".tr,

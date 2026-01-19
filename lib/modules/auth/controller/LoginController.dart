@@ -1,5 +1,3 @@
-
-
 // // phnechnage
 // import 'package:get/get.dart';
 // import 'package:beh_doctor/repo/AuthRepo.dart';
@@ -86,12 +84,10 @@
 //   }
 // }
 
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
 import 'package:beh_doctor/views/OtpScreen.dart';
-
 
 class LoginController extends GetxController {
   final AuthRepo repo = AuthRepo();
@@ -102,56 +98,50 @@ class LoginController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString traceId = ''.obs;
 
-  bool get isPhoneValid =>
-      RegExp(r'^\d{10}$').hasMatch(loginInputPhone.value);
-      Future<void> sendOtp() async {
-  if (!isPhoneValid) return;
+  bool get isPhoneValid => RegExp(r'^\d{10}$').hasMatch(loginInputPhone.value);
+  Future<void> sendOtp() async {
+    if (!isPhoneValid) return;
 
-  try {
-    isLoading.value = true;
+    try {
+      isLoading.value = true;
 
-    debugPrint("📤 SEND OTP API CALL START");
+      debugPrint("📤 SEND OTP API CALL START");
 
-    final res = await repo.requestOtp(
-      phone: loginInputPhone.value,
-      dialCode: "+880",
-    );
-
-    debugPrint("📥 SEND OTP API RESPONSE => ${res.status}");
-    debugPrint("📥 SEND OTP DATA => ${res.data}");
-
-    if (res.status == "success" && res.data != null) {
-      traceId.value = res.data!.traceId!;
-
-      debugPrint("✅ TRACE ID => ${traceId.value}");
-      debugPrint("➡️ NAVIGATING TO OTP SCREEN");
-
-      Get.to(
-        () => OtpScreen(
-          traceId: traceId.value,
-          bottomNavRoute: '/bottomNav',
-        ),
-        arguments: {
-          "phone":
-              "${loginInputDialCode.value}${loginInputPhone.value}",
-          "isForChangePhone": false,
-        },
+      final res = await repo.requestOtp(
+        phone: loginInputPhone.value,
+        dialCode: "+880",
       );
-    } else {
-      debugPrint("❌ SEND OTP FAILED => ${res.message}");
-      Get.snackbar("error".tr, res.message ?? "OTP failed");
+
+      debugPrint("📥 SEND OTP API RESPONSE => ${res.status}");
+      debugPrint("📥 SEND OTP DATA => ${res.data}");
+
+      if (res.status == "success" && res.data != null) {
+        traceId.value = res.data!.traceId!;
+
+        debugPrint("✅ TRACE ID => ${traceId.value}");
+        debugPrint("➡️ NAVIGATING TO OTP SCREEN");
+
+        Get.to(
+          () => OtpScreen(traceId: traceId.value, bottomNavRoute: '/bottomNav'),
+          arguments: {
+            "phone": "${loginInputDialCode.value}${loginInputPhone.value}",
+            "isForChangePhone": false,
+          },
+        );
+      } else {
+        debugPrint("❌ SEND OTP FAILED => ${res.message}");
+        Get.snackbar("error".tr, res.message ?? "OTP failed");
+      }
+    } catch (e, s) {
+      debugPrint("❌ SEND OTP EXCEPTION => $e");
+      debugPrintStack(stackTrace: s);
+
+      Get.snackbar("error".tr, "Something went wrong");
+    } finally {
+      isLoading.value = false;
+      debugPrint("🔚 SEND OTP FLOW END");
     }
-  } catch (e, s) {
-    debugPrint("❌ SEND OTP EXCEPTION => $e");
-    debugPrintStack(stackTrace: s);
-
-    Get.snackbar("error".tr, "Something went wrong");
-  } finally {
-    isLoading.value = false;
-    debugPrint("🔚 SEND OTP FLOW END");
   }
-}
-
 
   // Future<void> sendOtp() async {
   //   if (!isPhoneValid) return;

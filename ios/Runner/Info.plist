@@ -34,6 +34,8 @@
 	<string>We need photo library access to save captured images or videos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need photo library access to select and upload images.</string>
+	<key>NSUserNotificationUsageDescription</key>
+    <string>We need permission to send notifications about important updates, messages, and reminders.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -55,5 +57,16 @@
 	</array>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+
+	 <key>UIBackgroundModes</key>
+		<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+		</array>
+
+		<!-- Firebase Cloud Messaging Configuration -->
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
+
 </dict>
 </plist>

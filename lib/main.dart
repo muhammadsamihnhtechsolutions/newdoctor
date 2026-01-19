@@ -380,7 +380,6 @@
 //   }
 // }
 
-
 //       /// ✅ TOKEN REFRESH (ONLY ONE LISTENER)
 //       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
 //         await SharedPrefs.saveFcmToken(newToken);
@@ -484,45 +483,43 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 /// 🔔 BACKGROUND HANDLER
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   print("🔔 Background message received");
   print("📦 Data: ${message.data}");
 }
 
 /// 🔥 SINGLE SOURCE OF TOKEN (SAFE)
-Future<String> getDeviceToken() async {
-  final FirebaseMessaging messaging = FirebaseMessaging.instance;
+// Future<String> getDeviceToken() async {
+//   FirebaseMessaging messaging = FirebaseMessaging.instance;
+//   // Request permissions
+//   await messaging.requestPermission(
+//     alert: true,
+//     badge: true,
+//     sound: true,
+//     announcement: true,
+//     carPlay: true,
+//     criticalAlert: true,
+//     provisional: true,
+//   );
 
-  await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-    announcement: true,
-    carPlay: true,
-    criticalAlert: true,
-    provisional: true,
-  );
+//   // iOS specific check
+//   if (Platform.isIOS) {
+//     String? apns = await messaging.getAPNSToken();
+//     print("🔑 APNs Token: $apns");
 
-  /// 🍎 iOS APNs TOKEN
-  if (Platform.isIOS) {
-    final apnsToken = await messaging.getAPNSToken();
-    print("🍎 APNs Token: $apnsToken");
+//     if (apns == null) {
+//       print("❌ APNs token not yet set, returning empty.");
+//       return '';
+//     }
+//   }
 
-    if (apnsToken == null) {
-      print("❌ APNs token not yet available");
-      return '';
-    }
-  }
+//   // Fetch FCM token
+//   String? token = await messaging.getToken();
+//   print("🎯 FCM Token: $token");
 
-  /// 🔥 FCM TOKEN
-  final fcmToken = await messaging.getToken();
-  print("🎯 FCM Token: $fcmToken");
-
-  return fcmToken ?? '';
-}
+//   return token ?? 'dummy';
+// }
 
 void main() {
   runZonedGuarded(
@@ -546,24 +543,21 @@ void main() {
       /// 🍎 iOS FOREGROUND NOTIFICATION
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+            alert: true,
+            badge: true,
+            sound: true,
+          );
 
       /// 🔔 LOCAL NOTIFICATION INIT
       await LocalNotificationService.init();
 
       /// 🔔 BACKGROUND REGISTER
-      FirebaseMessaging.onBackgroundMessage(
-        firebaseMessagingBackgroundHandler,
-      );
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
       /// 🔄 TOKEN REFRESH LISTENER (ONLY ONE)
-   FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-  print("🔄 FCM TOKEN REFRESHED (NOT SAVED): $newToken");
-});
-
+      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+        print("🔄 FCM TOKEN REFRESHED (NOT SAVED): $newToken");
+      });
 
       /// 🔔 FOREGROUND MESSAGE
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -629,8 +623,9 @@ class MyApp extends StatelessWidget {
 
       builder: (context, child) {
         return MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(textScaler: const TextScaler.linear(1.0)),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(1.0)),
           child: EasyLoading.init()(context, child),
         );
       },
