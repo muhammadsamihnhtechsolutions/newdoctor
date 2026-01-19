@@ -61,17 +61,31 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  Future<void> getToken() async {
-    String? token = await SharedPrefs.getToken();
+  // Future<void> getToken() async {
+  //   String? token = await SharedPrefs.getToken();
 
-    await Future.delayed(const Duration(seconds: 5), () {
-      if (token != null && token.isNotEmpty) {
-        Get.offAll(() =>  BottomNavScreen());
-      } else {
-        Get.offAll(() => LoginScreen());
-      }
-    });
-  }
+  //   await Future.delayed(const Duration(seconds: 5), () {
+  //     if (token != null && token.isNotEmpty) {
+  //       Get.offAll(() =>  BottomNavScreen());
+  //     } else {
+  //       Get.offAll(() => LoginScreen());
+  //     }
+  //   });
+  // }
+  Future<void> getToken() async {
+  String? token = await SharedPrefs.getToken();
+
+  Future.delayed(const Duration(seconds: 2), () {
+    if (!mounted) return;
+
+    if (token != null && token.isNotEmpty) {
+      Get.offAll(() => BottomNavScreen());
+    } else {
+      Get.offAll(() => LoginScreen());
+    }
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {

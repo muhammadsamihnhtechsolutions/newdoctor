@@ -358,38 +358,7 @@ class LoginScreen extends StatelessWidget {
   ),
 )
 
-                // Obx(
-                //   () => SizedBox(
-                //     width: double.infinity,
-                //     height: 55,
-                //     child: ElevatedButton(
-                //       style: ElevatedButton.styleFrom(
-                //         backgroundColor: appGreen,
-                //         elevation: 0,
-                //         shape: RoundedRectangleBorder(
-                //           borderRadius:
-                //               BorderRadius.circular(14),
-                //         ),
-                //       ),
-                //       onPressed: controller.isLoading.value ||
-                //               !controller.isPhoneValid
-                //           ? null
-                //           : controller.sendOtp,
-                //       child: controller.isLoading.value
-                //           ? const CircularProgressIndicator(
-                //               color: Colors.white,
-                //             )
-                //           : Text(
-                //               "continue".tr,
-                //               style: const TextStyle(
-                //                 fontSize: 18,
-                //                 fontWeight: FontWeight.bold,
-                //                 color: Colors.white,
-                //               ),
-                //             ),
-                //     ),
-                //   ),
-                // ),
+               
 ,
                 const SizedBox(height: 25),
 

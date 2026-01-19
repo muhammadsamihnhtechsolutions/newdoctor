@@ -91,7 +91,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:beh_doctor/repo/AuthRepo.dart';
 import 'package:beh_doctor/views/OtpScreen.dart';
-import 'package:beh_doctor/modules/auth/controller/OtpController.dart';
+
 
 class LoginController extends GetxController {
   final AuthRepo repo = AuthRepo();

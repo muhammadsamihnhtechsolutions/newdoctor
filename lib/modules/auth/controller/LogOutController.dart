@@ -111,30 +111,42 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:beh_doctor/shareprefs.dart';
 import 'package:beh_doctor/modules/auth/controller/LanguageController.dart';
 
-
 class LogoutController extends GetxController {
   final LogoutRepo _repo = LogoutRepo();
 
+  final RxBool isLoading = false.obs; // ✅ ADD THIS
+
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    final deviceToken = await SharedPrefs.getFcmToken();
+    if (isLoading.value) return; // ✅ double tap safety
 
-    /// 🔥 Backend logout (non-blocking)
-   await _repo.logout(deviceToken: deviceToken);
+    try {
+      isLoading.value = true;
 
-await FirebaseMessaging.instance.deleteToken();
-await SharedPrefs.clearFcmToken();
+      final prefs = await SharedPreferences.getInstance();
+      final deviceToken = await SharedPrefs.getFcmToken();
 
-await prefs.remove('authToken');
-await prefs.remove('preOtpToken');
-await prefs.remove('token');
+      /// 🔥 Backend logout
+      await _repo.logout(deviceToken: deviceToken);
 
-Get.delete<BottomNavController>(force: true);
-Get.delete<DoctorProfileController>(force: true);
-Get.put(LanguageController(), permanent: true);
-Get.put(BottomNavController(), permanent: true);
+      await FirebaseMessaging.instance.deleteToken();
+      await SharedPrefs.clearFcmToken();
 
+      await prefs.remove('authToken');
+      await prefs.remove('preOtpToken');
+      await prefs.remove('token');
 
-Get.offAllNamed('/login');
+      Get.delete<BottomNavController>(force: true);
+      Get.delete<DoctorProfileController>(force: true);
+
+      Get.put(LanguageController(), permanent: true);
+      Get.put(BottomNavController(), permanent: true);
+
+      Get.offAllNamed('/login');
+    } catch (e) {
+      // optional: log only
+      rethrow;
+    } finally {
+      isLoading.value = false; // ✅ STOP LOADER
+    }
   }
 }

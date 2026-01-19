@@ -102,7 +102,7 @@ Future<void> _pickImage(ImageSource source) async {
           backgroundColor: Colors.white,
           iconTheme: const IconThemeData(color: _green),
           title: Text(
-            "create_profile".tr,
+            "create profile".tr,
             style: const TextStyle(
               color: _green,
               fontWeight: FontWeight.w600,
@@ -111,7 +111,12 @@ Future<void> _pickImage(ImageSource source) async {
         ),
         body: Obx(() {
           if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
+return const Center(
+  child: CircularProgressIndicator(
+    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF008541)),
+  ),
+);
+            
           }
 
           return SingleChildScrollView(

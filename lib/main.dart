@@ -335,13 +335,13 @@ void main() {
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      /// 🍎 iOS FOREGROUND NOTIFICATION ENABLE (ONLY ADDITION)
-      await FirebaseMessaging.instance
-          .setForegroundNotificationPresentationOptions(
-            alert: true,
-            badge: true,
-            sound: true,
-          );
+    /// 🍎 iOS FOREGROUND NOTIFICATION ENABLE (ONLY ADDITION)
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
       /// 🔔 LOCAL NOTIFICATION INIT
       await LocalNotificationService.init();
@@ -358,13 +358,28 @@ void main() {
 
       /// ✅ FCM TOKEN (SINGLE SOURCE)
       ///
+      // if (Platform.isAndroid) {
+      //   final fcmToken = await FirebaseMessaging.instance.getToken();
+      //   if (fcmToken != null && fcmToken.isNotEmpty) {
+      //     await SharedPrefs.saveFcmToken(fcmToken);
+      //     print("🔥 SAVED FCM TOKEN: $fcmToken");
+      //   }
+      // }
       if (Platform.isAndroid) {
-        final fcmToken = await FirebaseMessaging.instance.getToken();
-        if (fcmToken != null && fcmToken.isNotEmpty) {
-          await SharedPrefs.saveFcmToken(fcmToken);
-          print("🔥 SAVED FCM TOKEN: $fcmToken");
-        }
+  try {
+    FirebaseMessaging.instance.getToken().then((fcmToken) async {
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        await SharedPrefs.saveFcmToken(fcmToken);
+        print("🔥 SAVED FCM TOKEN: $fcmToken");
       }
+    }).catchError((e) {
+      print("❌ FCM TOKEN ERROR (IGNORED): $e");
+    });
+  } catch (e) {
+    print("❌ FCM INIT FAILED (SAFE): $e");
+  }
+}
+
 
       /// ✅ TOKEN REFRESH (ONLY ONE LISTENER)
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {

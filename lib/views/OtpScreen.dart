@@ -8,13 +8,13 @@ import 'package:beh_doctor/modules/auth/controller/OtpController.dart';
 class OtpScreen extends StatelessWidget {
   final String traceId;
   final String bottomNavRoute;
-  final bool isForChangePhone; // ✅ NEW (safe)
+  final bool isForChangePhone; 
 
   OtpScreen({
     super.key,
     required this.traceId,
     required this.bottomNavRoute,
-    this.isForChangePhone = false, // ✅ DEFAULT
+    this.isForChangePhone = false, 
   });
 
   @override

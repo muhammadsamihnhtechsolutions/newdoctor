@@ -101,44 +101,104 @@ class MorePage extends StatelessWidget {
               // ---------------- HELP ----------------
               sectionTitle("help".tr),
               menuTile("emergency_call".tr, Icons.call),
-
               const SizedBox(height: 50),
-            Center(
+
+Center(
   child: SizedBox(
     width: Get.width * 0.7,
     height: 46,
-    child: OutlinedButton.icon(
-      onPressed: () {
-        Get.put(LogoutController()).logout();
+    child: GetX<LogoutController>(
+      init: LogoutController(),
+      builder: (controller) {
+        return OutlinedButton.icon(
+          onPressed: controller.isLoading.value
+              ? null
+              : () {
+                  controller.logout();
+                },
+
+          icon: controller.isLoading.value
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.white,
+                  ),
+                )
+              : const Icon(
+                  Icons.logout,
+                  color: AppColors.white,
+                  size: 20,
+                ),
+
+          label: Text(
+            controller.isLoading.value
+                ? "logging_out".tr
+                : "logout".tr,
+            style: const TextStyle(
+              color: AppColors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          style: OutlinedButton.styleFrom(
+            backgroundColor: const Color(0xFF008541),
+            side: const BorderSide(
+              color: AppColors.white,
+              width: 1.2,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+        );
       },
-      icon: const Icon(
-        Icons.logout,
-        color:AppColors.white,
-        size: 20,
-      ),
-      label: Text(
-        "logout".tr,
-        style: const TextStyle(
-              color:AppColors.white,
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      style: OutlinedButton.styleFrom(
-        backgroundColor:  Color(0xFF008541),
-        side: const BorderSide(
-          color:AppColors.white,
-          width: 1.2,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-      ),
     ),
   ),
 ),
 
-              const SizedBox(height: 50),
+const SizedBox(height: 50),
+
+
+//               const SizedBox(height: 50),
+//             Center(
+//   child: SizedBox(
+//     width: Get.width * 0.7,
+//     height: 46,
+//     child: OutlinedButton.icon(
+//       onPressed: () {
+//         Get.put(LogoutController()).logout();
+//       },
+//       icon: const Icon(
+//         Icons.logout,
+//         color:AppColors.white,
+//         size: 20,
+//       ),
+//       label: Text(
+//         "logout".tr,
+//         style: const TextStyle(
+//               color:AppColors.white,
+//           fontSize: 15,
+//           fontWeight: FontWeight.w600,
+//         ),
+//       ),
+//       style: OutlinedButton.styleFrom(
+//         backgroundColor:  Color(0xFF008541),
+//         side: const BorderSide(
+//           color:AppColors.white,
+//           width: 1.2,
+//         ),
+//         shape: RoundedRectangleBorder(
+//           borderRadius: BorderRadius.circular(14),
+//         ),
+//       ),
+//     ),
+//   ),
+// ),
+
+//               const SizedBox(height: 50),
             ],
           ),
         ),
