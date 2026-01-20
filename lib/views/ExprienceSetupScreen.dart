@@ -7,7 +7,12 @@ import 'package:get/get.dart';
 class ExperienceSetupScreen extends StatelessWidget {
   ExperienceSetupScreen({super.key});
 
-  final controller = Get.put(ExperienceSetupController());
+  // final controller = Get.put(ExperienceSetupController());
+  final controller = Get.put(
+  ExperienceSetupController(),
+  permanent: true,
+);
+
 
   static const Color _green = Color(0xFF008541);
 
