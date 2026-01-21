@@ -111,32 +111,6 @@ class _AgoraDoctorCallScreenState extends State<AgoraDoctorCallScreen> {
                     : Container(color: Colors.white),
               ),
 
-              if (isRemoteJoined)
-                Positioned(
-                  top: 16,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.35),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        _formatStopwatchTime(controller.callDurationSec.value),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
 
               /// CALLING UI (before patient joins)
               if (!controller.isRemoteUserJoined.value)

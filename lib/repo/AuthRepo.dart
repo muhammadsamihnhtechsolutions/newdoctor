@@ -996,21 +996,7 @@ class DoctorProfileRepo {
     }
   }
 
-  // Future<UploadProfileImageResponse> uploadProfileImageInBase64(
-  //     String base64Image) async {
-  //   try {
-  //     final response = await _apiService.getPostResponse(
-  //       '${ApiConstants.baseUrl}/api/doctor/profile/uploadProfilePhoto',
-  //       {"base64String": base64Image},
-  //     );
-  //     return UploadProfileImageResponse.fromJson(response);
-  //   } catch (_) {
-  //     return UploadProfileImageResponse(
-  //       status: "error",
-  //       message: "Image upload failed",
-  //     );
-  //   }
-  // }
+  
 
   Future<UploadProfileImageResponse> uploadProfileImageInBase64({
   required String base64Image,
@@ -1432,18 +1418,32 @@ class SurgeryRepo {
   }
 }
 
+// class LogoutRepo {
+//   final ApiService _apiService = ApiService();
+
+//   Future<void> logout({String? deviceToken}) async {
+//     try {
+//       await _apiService.getPostResponse(
+//         '${ApiConstants.baseUrl}/api/doctor/auth/logout',
+//         {
+//           if (deviceToken != null && deviceToken.isNotEmpty)
+//             "deviceToken": deviceToken,
+//         },
+//       );
+//     } catch (_) {}
+//   }
+// }
+
 class LogoutRepo {
   final ApiService _apiService = ApiService();
 
   Future<void> logout({String? deviceToken}) async {
-    try {
-      await _apiService.getPostResponse(
-        '${ApiConstants.baseUrl}/api/doctor/auth/logout',
-        {
-          if (deviceToken != null && deviceToken.isNotEmpty)
-            "deviceToken": deviceToken,
-        },
-      );
-    } catch (_) {}
+    await _apiService.getPostResponse(
+      '${ApiConstants.baseUrl}/api/doctor/auth/logout',
+      {
+        if (deviceToken != null && deviceToken.isNotEmpty)
+          "deviceToken": deviceToken,
+      },
+    );
   }
 }

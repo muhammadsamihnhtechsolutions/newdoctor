@@ -1,10 +1,15 @@
+
+
+// ignore_for_file: unused_local_variable
+
+
 // import 'package:beh_doctor/views/PrivacyPolichyPage.dart';
 // import 'package:beh_doctor/views/TermsAndConditionsPage.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
-// import 'package:intl_phone_field/intl_phone_field.dart';
 // import 'package:beh_doctor/modules/auth/controller/LoginController.dart';
 // import 'package:beh_doctor/views/LanguageChipgetx.dart' as shared_chip;
+// import 'package:flutter/services.dart';
 
 // // ---------------- LOGIN SCREEN ----------------
 // class LoginScreen extends StatelessWidget {
@@ -24,7 +29,7 @@
 //         elevation: 0,
 //         backgroundColor: Colors.white,
 //         automaticallyImplyLeading: false,
-//         title: const Text("", style: TextStyle(color: Colors.black)),
+//         title: const Text(""),
 //         actions: [
 //           Padding(
 //             padding: const EdgeInsets.only(right: 12),
@@ -35,9 +40,7 @@
 
 //       body: GestureDetector(
 //         behavior: HitTestBehavior.translucent,
-//         onTap: () {
-//           FocusScope.of(context).unfocus();
-//         },
+//         onTap: () => FocusScope.of(context).unfocus(),
 //         child: SafeArea(
 //           child: SingleChildScrollView(
 //             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
@@ -58,39 +61,56 @@
 
 //                 const SizedBox(height: 40),
 
-//                 // -------- PHONE FIELD ----------
+//                 // -------- PHONE FIELD (MANUAL – SAME LOOK) --------
 //                 Obx(
-//                   () => IntlPhoneField(
+//                   () => TextFormField(
+//                     keyboardType: TextInputType.phone,
+//                     cursorColor: appGreen,
+//                     maxLength: 10,
+//                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
 //                     decoration: InputDecoration(
+//                       counterText: "",
 //                       labelText: 'enter_phone_number'.tr,
 //                       labelStyle: TextStyle(color: Colors.grey.shade600),
 //                       filled: true,
 //                       fillColor: Colors.grey.shade100,
+
+//                       prefixIcon: Padding(
+//                         padding: const EdgeInsets.symmetric(
+//                           horizontal: 12,
+//                           vertical: 14,
+//                         ),
+//                         child: Text(
+//                           "+880",
+//                           style: const TextStyle(
+//                             fontSize: 16,
+//                             fontWeight: FontWeight.w500,
+//                           ),
+//                         ),
+//                       ),
+//                       prefixIconConstraints: const BoxConstraints(
+//                         minWidth: 0,
+//                         minHeight: 0,
+//                       ),
+
 //                       errorText:
 //                           controller.loginInputPhone.value.isNotEmpty &&
-//                                   controller.loginInputPhone.value.length < 10
-//                               ? 'enter_phone_number'.tr
-//                               : null,
+//                               !controller.isPhoneValid
+//                           ? 'enter_phone_number'.tr
+//                           : null,
+
 //                       border: OutlineInputBorder(
 //                         borderRadius: BorderRadius.circular(14),
-//                         borderSide: BorderSide(color: appGreen),
+//                         borderSide: const BorderSide(color: appGreen),
 //                       ),
 //                       focusedBorder: OutlineInputBorder(
 //                         borderRadius: BorderRadius.circular(14),
-//                         borderSide:
-//                             const BorderSide(color: appGreen, width: 2),
+//                         borderSide: const BorderSide(color: appGreen, width: 2),
 //                       ),
 //                     ),
-
-//                     /// 🇧🇩 Bangladesh fixed
-//                     initialCountryCode: 'BD',
-//                     showDropdownIcon: false,
-//                     disableLengthCheck: true,
-//                     cursorColor: appGreen,
-
-//                     onChanged: (phone) {
-//                       controller.loginInputPhone.value = phone.number;
-//                       controller.loginInputDialCode.value = '+880';
+//                     onChanged: (value) {
+//                       controller.loginInputPhone.value = value.trim();
+//                       controller.loginInputDialCode.value = "+880";
 //                     },
 //                   ),
 //                 ),
@@ -110,13 +130,36 @@
 //                           borderRadius: BorderRadius.circular(14),
 //                         ),
 //                       ),
-//                       onPressed: controller.isLoading.value ||
-//                               !controller.isPhoneValid
+
+//                       onPressed:
+//                           controller.isLoading.value || !controller.isPhoneValid
 //                           ? null
-//                           : () => controller.sendOtp(),
+//                           : () async {
+//                               debugPrint("🟢 CONTINUE CLICKED (SEND OTP)");
+
+//                               try {
+//                                 // String? token = await getDeviceToken();
+
+//                                 await controller.sendOtp();
+//                               } catch (e, s) {
+//                                 debugPrint("❌ CRASH ON SEND OTP: $e");
+//                                 debugPrintStack(stackTrace: s);
+
+//                                 Get.snackbar(
+//                                   "error".tr,
+//                                   "Something crashed. Check logs.",
+//                                 );
+//                               }
+//                             },
+
 //                       child: controller.isLoading.value
-//                           ? const CircularProgressIndicator(
-//                               color: Colors.white,
+//                           ? const SizedBox(
+//                               height: 22,
+//                               width: 22,
+//                               child: CircularProgressIndicator(
+//                                 strokeWidth: 2,
+//                                 color: Colors.white,
+//                               ),
 //                             )
 //                           : Text(
 //                               "continue".tr,
@@ -129,7 +172,6 @@
 //                     ),
 //                   ),
 //                 ),
-
 //                 const SizedBox(height: 25),
 
 //                 // -------- TERMS & CONDITIONS --------
@@ -183,9 +225,6 @@
 //   }
 // }
 
-// ignore_for_file: unused_local_variable
-
-import 'package:beh_doctor/main.dart';
 import 'package:beh_doctor/views/PrivacyPolichyPage.dart';
 import 'package:beh_doctor/views/TermsAndConditionsPage.dart';
 import 'package:flutter/material.dart';
@@ -230,7 +269,7 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 50),
 
                 // --------- TITLE ---------
                 Text(
@@ -242,9 +281,24 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
 
-                // -------- PHONE FIELD (MANUAL – SAME LOOK) --------
+                // -------- ENTER PHONE NUMBER TEXT (UPPER LABEL) --------
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "enter_phone_number".tr,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // -------- PHONE FIELD WITH BANGLADESH FLAG --------
                 Obx(
                   () => TextFormField(
                     keyboardType: TextInputType.phone,
@@ -253,22 +307,28 @@ class LoginScreen extends StatelessWidget {
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       counterText: "",
-                      labelText: 'enter_phone_number'.tr,
-                      labelStyle: TextStyle(color: Colors.grey.shade600),
                       filled: true,
                       fillColor: Colors.grey.shade100,
 
+                      // 🇧🇩 FLAG + DIAL CODE
                       prefixIcon: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 14,
-                        ),
-                        child: Text(
-                          "+880",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text(
+                              "🇧🇩",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              "+880",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       prefixIconConstraints: const BoxConstraints(
@@ -278,9 +338,9 @@ class LoginScreen extends StatelessWidget {
 
                       errorText:
                           controller.loginInputPhone.value.isNotEmpty &&
-                              !controller.isPhoneValid
-                          ? 'enter_phone_number'.tr
-                          : null,
+                                  !controller.isPhoneValid
+                              ? 'enter_phone_number'.tr
+                              : null,
 
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -288,7 +348,8 @@ class LoginScreen extends StatelessWidget {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: appGreen, width: 2),
+                        borderSide:
+                            const BorderSide(color: appGreen, width: 2),
                       ),
                     ),
                     onChanged: (value) {
@@ -313,28 +374,21 @@ class LoginScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-
-                      onPressed:
-                          controller.isLoading.value || !controller.isPhoneValid
+                      onPressed: controller.isLoading.value ||
+                              !controller.isPhoneValid
                           ? null
                           : () async {
-                              debugPrint("🟢 CONTINUE CLICKED (SEND OTP)");
-
                               try {
-                                // String? token = await getDeviceToken();
-
                                 await controller.sendOtp();
                               } catch (e, s) {
-                                debugPrint("❌ CRASH ON SEND OTP: $e");
+                                debugPrint("❌ SEND OTP ERROR: $e");
                                 debugPrintStack(stackTrace: s);
-
                                 Get.snackbar(
                                   "error".tr,
-                                  "Something crashed. Check logs.",
+                                  "Something went wrong",
                                 );
                               }
                             },
-
                       child: controller.isLoading.value
                           ? const SizedBox(
                               height: 22,
@@ -355,6 +409,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 25),
 
                 // -------- TERMS & CONDITIONS --------
@@ -372,14 +427,15 @@ class LoginScreen extends StatelessWidget {
                       onTap: () {
                         Get.to(() => const TermsAndConditionsPage());
                       },
-                      child: const Text(
-                        "terms_conditions",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: appGreen,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                   child: Text(
+  "terms_conditions".tr,
+  style: const TextStyle(
+    fontSize: 12,
+    color: appGreen,
+    fontWeight: FontWeight.bold,
+  ),
+),
+
                     ),
                   ],
                 ),
@@ -407,3 +463,4 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
+

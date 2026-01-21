@@ -92,10 +92,12 @@ class AgoraCallController extends GetxController {
       },
       onRejectedEvent: (_) {
         _handleRemoteEnd("patient_rejected_call".tr);
+        
       },
       onEndedEvent: (_) {
         _handleRemoteEnd("patient_ended_call".tr);
       },
+      
     );
 
     await joinDoctorAgora();
@@ -105,7 +107,7 @@ class AgoraCallController extends GetxController {
           .firstWhere((v) => v == true)
           .timeout(const Duration(seconds: 20));
 
-      _startCallTimer();
+      // _startCallTimer();
       _startPatientJoinTimeout();
 
       Get.toNamed("/AgoraDoctorCallScreen");
@@ -133,6 +135,8 @@ class AgoraCallController extends GetxController {
             remoteUid.value = uid;
             isRemoteUserJoined.value = true;
             _patientJoinTimer?.cancel();
+               _startCallTimer();
+
           },
           onUserOffline: (_, __, ___) {
             _handleRemoteEnd("patient_disconnected_call".tr);
@@ -178,16 +182,29 @@ class AgoraCallController extends GetxController {
   }
 
   Future<void> _handleRemoteEnd(String message) async {
-    if (_callEnded) return;
-    _callEnded = true;
+  if (_callEnded) return;
+  _callEnded = true;
 
-    Get.snackbar("call_ended".tr, message);
+  Get.snackbar("call_ended".tr, message);
 
-    await _endCallInternal(
-      emitEndCallEvent: false,
-      goToPrescription: false,
-    );
-  }
+  _stopAllTimers();          // timer band
+  await _cleanupEngine();    // agora leave
+
+  shouldCloseCallScreen.value = true; // screen band
+}
+
+
+  // Future<void> _handleRemoteEnd(String message) async {
+  //   if (_callEnded) return;
+  //   _callEnded = true;
+
+  //   Get.snackbar("call_ended".tr, message);
+
+  //   await _endCallInternal(
+  //     emitEndCallEvent: false,
+  //     goToPrescription: false,
+  //   );
+  // }
 
   Future<void> endCall({required bool goToPrescription}) async {
     if (_callEnded) return;

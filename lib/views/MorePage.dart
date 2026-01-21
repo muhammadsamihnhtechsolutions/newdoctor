@@ -114,7 +114,9 @@ Center(
           onPressed: controller.isLoading.value
               ? null
               : () {
-                  controller.logout();
+                  // controller.logout();
+                  controller.showLogoutConfirmation();
+
                 },
 
           icon: controller.isLoading.value

@@ -478,7 +478,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           backgroundColor: Colors.white,
           iconTheme: const IconThemeData(color: _green),
           title: Text(
-            "create profile".tr,
+            "Create Profile".tr,
             style: const TextStyle(
               color: _green,
               fontWeight: FontWeight.w600,

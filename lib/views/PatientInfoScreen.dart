@@ -1,4 +1,3 @@
-
 import 'package:beh_doctor/apiconstant/apiconstant.dart';
 import 'package:beh_doctor/models/AppointmentModel.dart';
 import 'package:beh_doctor/modules/auth/controller/AgoraCallController.dart';
@@ -10,10 +9,17 @@ import 'package:get/get.dart';
 import 'package:beh_doctor/shareprefs.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
-class PatientInfoScreen extends StatelessWidget {
+class PatientInfoScreen extends StatefulWidget {
   final Appointment appointment;
 
-  PatientInfoScreen({super.key, required this.appointment});
+  const PatientInfoScreen({super.key, required this.appointment});
+
+  @override
+  State<PatientInfoScreen> createState() => _PatientInfoScreenState();
+}
+
+class _PatientInfoScreenState extends State<PatientInfoScreen> {
+  bool _isCalling = false;
 
   String buildImageUrl(String path) {
     if (path.startsWith('http')) return path;
@@ -43,7 +49,7 @@ class PatientInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final patient = appointment.patient;
+    final patient = widget.appointment.patient;
 
     String? profileImage =
         (patient?.photo != null && patient!.photo!.isNotEmpty)
@@ -106,7 +112,7 @@ class PatientInfoScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "${patient?.gender ?? ''} • ${appointment.age ?? ''} Years • ${appointment.weight ?? ''} KG",
+                        "${patient?.gender ?? ''} • ${widget.appointment.age ?? ''} Years • ${widget.appointment.weight ?? ''} KG",
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.black54,
@@ -157,8 +163,8 @@ class PatientInfoScreen extends StatelessWidget {
                           title: "Test\nResults",
                           onTap: () {
                             Get.to(() => TestResultScreen(
-                                  appointmentId: appointment.id ?? "",
-                                  appointment: appointment,
+                                  appointmentId: widget.appointment.id ?? "",
+                                  appointment: widget.appointment,
                                 ));
                           },
                         ),
@@ -180,7 +186,7 @@ class PatientInfoScreen extends StatelessWidget {
 
             Builder(
               builder: (_) {
-                final eyeTests = appointment.eyePhotos;
+                final eyeTests = widget.appointment.eyePhotos;
 
                 if (eyeTests == null || eyeTests.isEmpty) {
                   return _emptyBox("No eye test image");
@@ -223,12 +229,12 @@ class PatientInfoScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            appointment.additionalFiles != null &&
-                    appointment.additionalFiles!.isNotEmpty
+            widget.appointment.additionalFiles != null &&
+                    widget.appointment.additionalFiles!.isNotEmpty
                 ? Wrap(
                     spacing: 14,
                     runSpacing: 14,
-                    children: appointment.additionalFiles!.map((filePath) {
+                    children: widget.appointment.additionalFiles!.map((filePath) {
                       final fullUrl = buildImageUrl(filePath);
 
                       return GestureDetector(
@@ -269,38 +275,94 @@ class PatientInfoScreen extends StatelessWidget {
 
             // ---------------- CALL NOW BUTTON ----------------
             SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final controller = Get.put(AgoraCallController());
-                  await SharedPrefs.saveAgoraChannelId(appointment.id ?? "");
-                  await SharedPrefs.saveDoctorAgoraToken(
-                      appointment.doctorAgoraToken ?? "");
-                  controller.setAppointment(appointment);
-                  await controller.callNow();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.color008541,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.videocam, size: 20),
-                    SizedBox(width: 8),
-                    Text(
-                      "Call Now",
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-              ),
+  width: double.infinity,
+  height: 48,
+  child: ElevatedButton(
+    onPressed: _isCalling
+        ? null // ✅ disable button
+        : () async {
+            setState(() {
+              _isCalling = true; // 🔒 lock on first tap
+            });
+
+            final controller = Get.put(AgoraCallController());
+            await SharedPrefs.saveAgoraChannelId(widget.appointment.id ?? "");
+            await SharedPrefs.saveDoctorAgoraToken(
+                widget.appointment.doctorAgoraToken ?? "");
+            controller.setAppointment(widget.appointment);
+
+            await controller.callNow();
+
+            // ❗ Agar kisi wajah se screen open na ho
+            // (error / timeout)
+            setState(() {
+              _isCalling = false; // 🔓 unlock again
+            });
+          },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: AppColors.color008541,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    child: _isCalling
+        ? const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
             ),
+          )
+        : const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.videocam, size: 20),
+              SizedBox(width: 8),
+              Text(
+                "Call Now",
+                style: TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+  ),
+),
+
+            // SizedBox(
+            //   width: double.infinity,
+            //   height: 48,
+            //   child: ElevatedButton(
+            //     onPressed: () async {
+            //       final controller = Get.put(AgoraCallController());
+            //       await SharedPrefs.saveAgoraChannelId(appointment.id ?? "");
+            //       await SharedPrefs.saveDoctorAgoraToken(
+            //           appointment.doctorAgoraToken ?? "");
+            //       controller.setAppointment(appointment);
+            //       await controller.callNow();
+            //     },
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: AppColors.color008541,
+            //       foregroundColor: Colors.white,
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //     ),
+            //     child: const Row(
+            //       mainAxisAlignment: MainAxisAlignment.center,
+            //       children: [
+            //         Icon(Icons.videocam, size: 20),
+            //         SizedBox(width: 8),
+            //         Text(
+            //           "Call Now",
+            //           style:
+            //               TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
